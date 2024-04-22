@@ -11,4 +11,8 @@
     <color name="settings_theme_color">#FF000000</color>
     <color name="main_text_color">#FF000000</color>
     <color name="settings_text_color">#FFFFFFFF</color>
+    <color name="settings_button_color">#AEAFB4</color>
+    <color name="search_hint_color">#FF000000</color>
+    <color name="search_background_color">#FFFFFFFF</color>
+    <color name="ic_search_menu_close_clear_cancel">#FFFFFFFF</color>
 </resources>

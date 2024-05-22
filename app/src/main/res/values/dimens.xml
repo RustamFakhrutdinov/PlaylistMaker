@@ -9,4 +9,17 @@
     <dimen name="block_height">61dp</dimen>
     <dimen name="text_size">16sp</dimen>
     <dimen name="search_padding">8dp</dimen>
+
+    //Track
+    <dimen name="track_padding_horizontal">13dp</dimen>
+    <dimen name="track_padding_vertical">8dp</dimen>
+    <dimen name="track_cover_size">45dp</dimen>
+    <dimen name="layout_name_height">33dp</dimen>
+    <dimen name="layout_margin_left">8dp</dimen>
+    <dimen name="layout_name_margin_vertical">6dp</dimen>
+    <dimen name="layout_performer_name_height">13dp</dimen>
+    <dimen name="track_dot_size">13dp</dimen>
+    <dimen name="performer_size">11dp</dimen>
+    <dimen name="arrow_forward">24dp</dimen>
+
 </resources>

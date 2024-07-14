@@ -15,9 +15,7 @@
     <string name="mailto">mailto:</string>
     <string name="url_for_user_agreement">https://yandex.ru/legal/practicum_offer/</string>
     <string name="hint_search">Поиск</string>
-    <string name="nothing_found">Ничего не нашлось</string>
-    <string name="something_went_wrong">Проблемы со связью \n\nЗагрузка не удалась. Проверьте подключение к интернету</string>
-    <string name="refresh">Обновить</string>
+
 
 
 </resources>

@@ -21,7 +21,7 @@ class TrackVeiwHolder (itemView: View): RecyclerView.ViewHolder(itemView) {
 
     fun bind(track: Track) {
         val imageUrl:String = track.artworkUrl100
-
+        performerName.requestLayout()
         trackName.text = track.trackName
         performerName.text = track.artistName
         time.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)

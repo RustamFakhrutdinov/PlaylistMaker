@@ -50,6 +50,7 @@
             <TextView
                 android:id="@+id/trackTime"
                 style="@style/PerformerName"
+
                 tools:text="4:15" />
         </LinearLayout>
 

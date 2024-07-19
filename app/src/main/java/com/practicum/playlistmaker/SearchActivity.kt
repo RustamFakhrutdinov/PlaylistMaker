@@ -110,7 +110,8 @@ class SearchActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<TracksResponse>,
                                         response: Response<TracksResponse>
                 ) {
-                    if (response.code() == 200) {
+
+                    if (response.isSuccessful) {
                         tracksList.clear()
                         if (response.body()?.results?.isNotEmpty() == true) {
                             tracksList.addAll(response.body()?.results!!)
@@ -126,7 +127,7 @@ class SearchActivity : AppCompatActivity() {
                             showErrorImage(getString(R.string.nothing_found), "")
                             showRefreshButton("","")
                         } else {
-                            showMessage("", "")
+                            hideMessage()
                             showErrorImage("", "")
                             showRefreshButton("","")
                         }
@@ -176,6 +177,9 @@ class SearchActivity : AppCompatActivity() {
         } else {
             placeholderMessage.visibility = View.GONE
         }
+    }
+    private fun hideMessage() {
+            placeholderMessage.visibility = View.GONE
     }
     private fun showErrorImage(text: String,additionalMessage: String) {
         if (text.isNotEmpty()) {

@@ -12,6 +12,7 @@
     <ImageView
         android:id="@+id/trackСover"
         style="@style/TrackCover"
+
          />
     <LinearLayout
         android:layout_height="@dimen/layout_name_height"
@@ -24,10 +25,12 @@
         <TextView
             android:id="@+id/trackName"
             style="@style/TrackName"
-            tools:text="Названиеdfgfgdgdfgdfghfsdhfguygyyqwer" />
+            android:ellipsize="end"
+            android:singleLine="true"
+            tools:text="Названиеdfgfgdgdfgdfghfsdhfguygyyqwe" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/layout_performer_name_height"
             android:orientation="horizontal"
             android:layout_marginTop="1dp">
@@ -35,13 +38,19 @@
             <TextView
                 android:id="@+id/performerName"
                 style="@style/PerformerName"
-                tools:text="Названиеgdfgdfgdfg" />
+                tools:text="Названиеgdfgdfgdfgfdhgjhgkhjfdgdf"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
             <ImageView
                 style="@style/Dot"
                 android:src="@drawable/dot" />
             <TextView
                 android:id="@+id/trackTime"
                 style="@style/PerformerName"
+
                 tools:text="4:15" />
         </LinearLayout>
 

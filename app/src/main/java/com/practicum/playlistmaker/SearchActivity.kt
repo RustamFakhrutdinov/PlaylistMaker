@@ -1,20 +1,44 @@
 package com.practicum.playlistmaker
 
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchActivity : AppCompatActivity() {
 
+    private val itunesBaseUrl = "https://itunes.apple.com"
     private var editTextValue: String = NAME_DEF
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(itunesBaseUrl)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val iTunesService = retrofit.create(ITunesSearchApi::class.java)
+
+
+    private val tracksList = arrayListOf<Track>()
+    private val trackAdapter =TrackAdapter(tracksList)
+    private lateinit var placeholderMessage: TextView
+    private lateinit var placeholderErrorImage: ImageView
+    private lateinit var placeholderRefreshButton: Button
+    private lateinit var inputEditText: EditText
 
     companion object {
         const val SEARCH_NAME = "TEXT_WATCHER_NAME"
@@ -24,8 +48,11 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
+        placeholderMessage = findViewById(R.id.placeholderMessage)
+        placeholderErrorImage = findViewById(R.id.ErrorСover)
         val linearLayout = findViewById<LinearLayout>(R.id.container)
-        val inputEditText = findViewById<EditText>(R.id.inputEditText)
+        inputEditText = findViewById<EditText>(R.id.inputEditText)
+        placeholderRefreshButton = findViewById<Button>(R.id.refresh)
         val clearButton = findViewById<Button>(R.id.clearIcon)
         val backButton = findViewById<Button>(R.id.arrowBack)
 
@@ -38,6 +65,11 @@ class SearchActivity : AppCompatActivity() {
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
+            tracksList.clear()
+            trackAdapter.notifyDataSetChanged()
+        }
+        placeholderRefreshButton.setOnClickListener {
+            search()
         }
 
         val searchTextWatcher = object : TextWatcher {
@@ -57,36 +89,123 @@ class SearchActivity : AppCompatActivity() {
         }
         inputEditText.addTextChangedListener(searchTextWatcher)
 
-
-
-
-        val tracksArrayList: ArrayList<Track> = arrayListOf(
-            Track("Yesterday (Remastered 2009)", "The Beatlesjhbgiusgbweogbwoebewgjuvavovboia", "2:55",
-                "https://s3-alpha-sig.figma.com/img/c2df/63f0/b535f173143b2a1e1fc0c069482185b6?Expires=1717372800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=DFRnsnHi8C4EoSmMfDKvEveay-pgTkV56bTLPt3UCA3SHksoQtYmPQKsxF3sahn35XwxNX14NGQLrb7Hd7mskAHz7j70cWJJN13JBxuP~Z~-tjhAJIn6eLQmSnq2oWXD1jTkBTE-7JJZTR8OMhVfomI27bOx3UdrlaZh3BG7dH8hgm8oahaUeziT1-T-95s6gQBa1ugmgF-4B23WgbEFCpUJI5EmMYsPImBtdK4IJfOzW6VkIIAGDs6LPdh8Z81RQofygvv49USg-oilVTM04lcb7Qe8GMaLsL4aNMY0xkn~UWGQyih~IFgpnsTv74Grwie4o5RGnqYoptm6PS9UQA__"),
-            Track("Here Comes The Sun (Remastered 2009)jbefaibsdbkjs", "The Beatles", "4:01",
-                "https://s3-alpha-sig.figma.com/img/88d4/998a/44813e71e0b476b0d3be316e151c9d8e?Expires=1717372800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=djtSo993mB8IsickC7BZYIdzTRct1v3taJBZQa27PN3LZdsF0X46jZIEQgpU9bZDkv8u00VbGGkC1HRCmjmTvJbP7hODpefsadVxFi9p0xocElU4SuRxMf2LWvjZ7dmYjHu1-n1rma~MzT740CvCJms6mYJK3~NP2cSJkv6RZGZ65HZ0RU1JKqbZNcrFfmxnaN5wqkcJS5mdcEizzd4OC9AW8KtP6kl9lhxhxnplUInxVOjQmnWyLHPcnztvao1-GvzISGURcCCFs-lMVuF~7qUkUf6zM8wjWg7Mlx4yL1p~XpM7GS2qey2fNqtWEQpIPhonIinjXpUN~VVFiNAxnQ__"),
-            Track("No Reply", "The Beatles", "5:12",
-                "https://s3-alpha-sig.figma.com/img/d7b8/cd0b/608881a0d071e280c2c3559fdf879901?Expires=1717372800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEIUEWnTfa4KlTjpW4XpjSuX~F57YEXnUDamCPwD7Or4jRaF7AH2wIJCgk1QHnQ1l~9iU~DypUqsyUBqmq0pW~NbBiVTelgDMYDrhptBmJG1WUpwevBLnTEa-xVv5Ey2-cjTvpH38v62Vo5~fYdKdO2ueJarXiTpHrs2ogstL5SqQ1TlAM9lR69Zzw2IlWr18WjuJNDuU-rImPOsfBCfE8jcz~iNQAe6eDQCRSV4xMz9Tk8d29ZwJQJkGwL~dMrQMWfkU03Iy5y1Kd2tst6Cp4eE-JyfbJt9R6Jc7hAtT-kJvUvvXNaF3xDTJ857vQKWJGDBsouRU9hpZwxGgNemrg__"),
-            Track("Let It Be", "The Beatles", "6:01",
-                "https://s3-alpha-sig.figma.com/img/d7b8/cd0b/608881a0d071e280c2c3559fdf879901?Expires=1717372800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEIUEWnTfa4KlTjpW4XpjSuX~F57YEXnUDamCPwD7Or4jRaF7AH2wIJCgk1QHnQ1l~9iU~DypUqsyUBqmq0pW~NbBiVTelgDMYDrhptBmJG1WUpwevBLnTEa-xVv5Ey2-cjTvpH38v62Vo5~fYdKdO2ueJarXiTpHrs2ogstL5SqQ1TlAM9lR69Zzw2IlWr18WjuJNDuU-rImPOsfBCfE8jcz~iNQAe6eDQCRSV4xMz9Tk8d29ZwJQJkGwL~dMrQMWfkU03Iy5y1Kd2tst6Cp4eE-JyfbJt9R6Jc7hAtT-kJvUvvXNaF3xDTJ857vQKWJGDBsouRU9hpZwxGgNemrg__"),
-            Track("Girl", "The Beatles", "4:11",
-                "https://s3-alpha-sig.figma.com/img/d7b8/cd0b/608881a0d071e280c2c3559fdf879901?Expires=1717372800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEIUEWnTfa4KlTjpW4XpjSuX~F57YEXnUDamCPwD7Or4jRaF7AH2wIJCgk1QHnQ1l~9iU~DypUqsyUBqmq0pW~NbBiVTelgDMYDrhptBmJG1WUpwevBLnTEa-xVv5Ey2-cjTvpH38v62Vo5~fYdKdO2ueJarXiTpHrs2ogstL5SqQ1TlAM9lR69Zzw2IlWr18WjuJNDuU-rImPOsfBCfE8jcz~iNQAe6eDQCRSV4xMz9Tk8d29ZwJQJkGwL~dMrQMWfkU03Iy5y1Kd2tst6Cp4eE-JyfbJt9R6Jc7hAtT-kJvUvvXNaF3xDTJ857vQKWJGDBsouRU9hpZwxGgNemrg__"),
-            Track("Michelle", "The Beatles", "3:01",
-                "https://s3-alpha-sig.figma.com/img/d7b8/cd0b/608881a0d071e280c2c3559fdf879901?Expires=1717372800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEIUEWnTfa4KlTjpW4XpjSuX~F57YEXnUDamCPwD7Or4jRaF7AH2wIJCgk1QHnQ1l~9iU~DypUqsyUBqmq0pW~NbBiVTelgDMYDrhptBmJG1WUpwevBLnTEa-xVv5Ey2-cjTvpH38v62Vo5~fYdKdO2ueJarXiTpHrs2ogstL5SqQ1TlAM9lR69Zzw2IlWr18WjuJNDuU-rImPOsfBCfE8jcz~iNQAe6eDQCRSV4xMz9Tk8d29ZwJQJkGwL~dMrQMWfkU03Iy5y1Kd2tst6Cp4eE-JyfbJt9R6Jc7hAtT-kJvUvvXNaF3xDTJ857vQKWJGDBsouRU9hpZwxGgNemrg__"),
-            Track("Eleanor Rigby", "The Beatles", "6:12",
-                "https://s3-alpha-sig.figma.com/img/d7b8/cd0b/608881a0d071e280c2c3559fdf879901?Expires=1717372800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEIUEWnTfa4KlTjpW4XpjSuX~F57YEXnUDamCPwD7Or4jRaF7AH2wIJCgk1QHnQ1l~9iU~DypUqsyUBqmq0pW~NbBiVTelgDMYDrhptBmJG1WUpwevBLnTEa-xVv5Ey2-cjTvpH38v62Vo5~fYdKdO2ueJarXiTpHrs2ogstL5SqQ1TlAM9lR69Zzw2IlWr18WjuJNDuU-rImPOsfBCfE8jcz~iNQAe6eDQCRSV4xMz9Tk8d29ZwJQJkGwL~dMrQMWfkU03Iy5y1Kd2tst6Cp4eE-JyfbJt9R6Jc7hAtT-kJvUvvXNaF3xDTJ857vQKWJGDBsouRU9hpZwxGgNemrg__"),
-            Track("Come Together", "The Beatles", "4:09",
-                "https://s3-alpha-sig.figma.com/img/d7b8/cd0b/608881a0d071e280c2c3559fdf879901?Expires=1717372800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEIUEWnTfa4KlTjpW4XpjSuX~F57YEXnUDamCPwD7Or4jRaF7AH2wIJCgk1QHnQ1l~9iU~DypUqsyUBqmq0pW~NbBiVTelgDMYDrhptBmJG1WUpwevBLnTEa-xVv5Ey2-cjTvpH38v62Vo5~fYdKdO2ueJarXiTpHrs2ogstL5SqQ1TlAM9lR69Zzw2IlWr18WjuJNDuU-rImPOsfBCfE8jcz~iNQAe6eDQCRSV4xMz9Tk8d29ZwJQJkGwL~dMrQMWfkU03Iy5y1Kd2tst6Cp4eE-JyfbJt9R6Jc7hAtT-kJvUvvXNaF3xDTJ857vQKWJGDBsouRU9hpZwxGgNemrg__"),
-
-            )
-
-
         val rvTrack = findViewById<RecyclerView>(R.id.rvTrack)
-        val weatherAdapter = TrackAdapter(tracksArrayList)
-        rvTrack.adapter = weatherAdapter
 
+        rvTrack.adapter = trackAdapter
+
+        inputEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                search()
+                true
+            }
+            false
+
+
+        }
+    }
+    private fun search() {
+        if (inputEditText.text.isNotEmpty()) {
+            iTunesService.search(inputEditText.text.toString()).enqueue(object :
+                Callback<TracksResponse> {
+                override fun onResponse(call: Call<TracksResponse>,
+                                        response: Response<TracksResponse>
+                ) {
+
+                    if (response.isSuccessful) {
+                        tracksList.clear()
+                        if (response.body()?.results?.isNotEmpty() == true) {
+                            tracksList.addAll(response.body()?.results!!)
+                            trackAdapter.notifyDataSetChanged()
+                        }
+                        if (tracksList.isEmpty()) {
+                            showMessage(getString(R.string.nothing_found), "")
+                            if(isDarkModeOn()) {
+                                placeholderErrorImage.setImageResource(R.drawable.nothing_found_dark_mode)
+                            } else {
+                                placeholderErrorImage.setImageResource(R.drawable.nothing_found_light_mode)
+                            }
+                            showErrorImage(getString(R.string.nothing_found), "")
+                            showRefreshButton("","")
+                        } else {
+                            hideMessage()
+                            showErrorImage("", "")
+                            showRefreshButton("","")
+                        }
+                    } else {
+                        showMessage(getString(R.string.something_went_wrong), response.code().toString())
+                        if(isDarkModeOn()) {
+                            placeholderErrorImage.setImageResource(R.drawable.connection_problems_dark_mode)
+                            showRefreshButton(getString(R.string.something_went_wrong), "")
+                        } else {
+                            placeholderErrorImage.setImageResource(R.drawable.connection_problems_light_mode)
+                            showRefreshButton(getString(R.string.something_went_wrong), "")
+                        }
+
+                        showErrorImage(getString(R.string.something_went_wrong), "")
+                    }
+                }
+
+                override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                    showMessage(getString(R.string.something_went_wrong), t.message.toString())
+                    if(isDarkModeOn()) {
+                        placeholderErrorImage.setImageResource(R.drawable.connection_problems_dark_mode)
+                        showRefreshButton(getString(R.string.something_went_wrong), "")
+                    } else {
+                        placeholderErrorImage.setImageResource(R.drawable.connection_problems_light_mode)
+                        showRefreshButton(getString(R.string.something_went_wrong), "")
+                    }
+
+                    showErrorImage(getString(R.string.something_went_wrong), "")
+                }
+
+            })
+        }
     }
 
+
+
+    private fun showMessage(text: String,additionalMessage: String) {
+        if (text.isNotEmpty()) {
+            placeholderMessage.visibility = View.VISIBLE
+            tracksList.clear()
+            trackAdapter.notifyDataSetChanged()
+            placeholderMessage.text = text
+            if (additionalMessage.isNotEmpty()) {
+                Toast.makeText(applicationContext, additionalMessage, Toast.LENGTH_LONG)
+                    .show()
+            }
+        } else {
+            placeholderMessage.visibility = View.GONE
+        }
+    }
+    private fun hideMessage() {
+            placeholderMessage.visibility = View.GONE
+    }
+    private fun showErrorImage(text: String,additionalMessage: String) {
+        if (text.isNotEmpty()) {
+            placeholderErrorImage.visibility = View.VISIBLE
+            tracksList.clear()
+            trackAdapter.notifyDataSetChanged()
+        } else {
+            placeholderErrorImage.visibility = View.GONE
+        }
+    }
+
+    private fun showRefreshButton(text: String,additionalMessage: String) {
+
+        if (text.isNotEmpty()) {
+            placeholderRefreshButton.visibility = View.VISIBLE
+            tracksList.clear()
+            trackAdapter.notifyDataSetChanged()
+        } else {
+            placeholderRefreshButton.visibility = View.GONE
+        }
+    }
+    fun isDarkModeOn(): Boolean {
+        val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val isDarkModeOn = nightModeFlags == Configuration.UI_MODE_NIGHT_YES
+        return isDarkModeOn
+    }
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {
             View.GONE

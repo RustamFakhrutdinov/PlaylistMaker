@@ -33,7 +33,9 @@
 
         <EditText
             android:id="@+id/inputEditText"
-            style="@style/Search" />
+            style="@style/Search"
+            android:imeOptions="actionDone"
+            android:singleLine="true"/>
 
         <Button
             android:id="@+id/clearIcon"
@@ -42,15 +44,43 @@
         </Button>
     </FrameLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvTrack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+    <FrameLayout android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:itemCount="10"
-        tools:listitem="@layout/track_item" />
+        android:layout_marginTop="16dp">
+
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="10"
+            tools:listitem="@layout/track_item"/>
+        <ImageView
+            android:id="@+id/ErrorСover"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="102dp"
+            />
+<!--        style="@style/TrackCover"-->
+        <TextView android:id="@+id/placeholderMessage"
+            style="@style/PlaceholderText"
+            />
+
+        <Button
+            android:id="@+id/refresh"
+            style="@style/RefreshButton"
+
+
+
+            android:visibility="gone"
+
+
+            />
+    </FrameLayout>
+
 
 
 </LinearLayout>

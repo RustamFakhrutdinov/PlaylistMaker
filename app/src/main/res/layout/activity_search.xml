@@ -56,7 +56,7 @@
             android:orientation="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:itemCount="10"
-            tools:listitem="@layout/track_item"/>
+            tools:listitem="@layout/track_item" />
         <ImageView
             android:id="@+id/ErrorСover"
             android:layout_width="120dp"
@@ -64,7 +64,35 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="102dp"
             />
-<!--        style="@style/TrackCover"-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView android:id="@+id/historyMessage"
+                style="@style/HistoryText"
+                android:padding="14dp"
+                android:visibility="gone"
+                />
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvHistoryTrack"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3"
+                tools:listitem="@layout/track_item"
+                android:visibility="gone"/>
+            <Button
+                android:id="@+id/cleanHistoryButton"
+                style="@style/CleanHistoryButton"
+                android:padding="0dp"
+                android:visibility="gone"
+                />
+
+
+
+        </LinearLayout>
         <TextView android:id="@+id/placeholderMessage"
             style="@style/PlaceholderText"
             />
@@ -72,12 +100,7 @@
         <Button
             android:id="@+id/refresh"
             style="@style/RefreshButton"
-
-
-
             android:visibility="gone"
-
-
             />
     </FrameLayout>
 

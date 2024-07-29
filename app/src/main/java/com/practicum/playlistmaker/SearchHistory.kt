@@ -20,7 +20,7 @@ class SearchHistory(private val sharedPreferences: SharedPreferences) {
 
     fun read(): ArrayList<Track> {
 
-        val json: String? = sharedPreferences.getString(HISTORY_TRACK_KEY, null)
+        val json: String? = sharedPreferences.getString(HISTORY_TRACK_KEY, null) ?: return arrayListOf()
         val itemType = object : TypeToken<List<Track>>() {}.type
         return Gson().fromJson(json, itemType)
 

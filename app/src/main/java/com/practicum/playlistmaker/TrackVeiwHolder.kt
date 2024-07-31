@@ -18,7 +18,7 @@ class TrackVeiwHolder (itemView: View): RecyclerView.ViewHolder(itemView) {
     private val performerName: TextView = itemView.findViewById(R.id.performerName)
     private val time: TextView = itemView.findViewById(R.id.trackTime)
     private val trackCover: ImageView = itemView.findViewById(R.id.trackСover)
-
+    var onTrackClickListener: OnTrackClickListener? = null
     fun bind(track: Track) {
         val imageUrl:String = track.artworkUrl100
         performerName.requestLayout()
@@ -31,12 +31,18 @@ class TrackVeiwHolder (itemView: View): RecyclerView.ViewHolder(itemView) {
             .centerCrop()
             .transform(RoundedCorners(dpToPx(2f,itemView.context)))
             .into(trackCover)
+        itemView.setOnClickListener {
+            onTrackClickListener?.onTrackClick(track)
+        }
     }
     fun dpToPx(dp: Float, context: Context): Int {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             dp,
             context.resources.displayMetrics).toInt()
+    }
+    fun interface OnTrackClickListener {
+        fun onTrackClick(track: Track)
     }
 
 }

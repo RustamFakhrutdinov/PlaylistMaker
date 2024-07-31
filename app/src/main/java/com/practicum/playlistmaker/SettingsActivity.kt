@@ -3,10 +3,14 @@ package com.practicum.playlistmaker
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.ActionMenuView
 import android.widget.Button
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.switchmaterial.SwitchMaterial
 
+const val DARK_THEME_PREFERENCES = "dark_theme_preferences"
+const val DARK_THEME_KEY = "key_for_dark_theme"
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,17 +22,27 @@ class SettingsActivity : AppCompatActivity() {
         val backButton = findViewById<Button>(R.id.arrowBack)
 
         backButton.setOnClickListener {
-            val mainIntent = Intent(this, MainActivity::class.java)
-            startActivity(mainIntent)
+//            val mainIntent = Intent(this, MainActivity::class.java)
+//            startActivity(mainIntent)
+            finish()
         }
 
+        val sharedPrefs = getSharedPreferences(DARK_THEME_PREFERENCES, MODE_PRIVATE)
+        val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
+
+        themeSwitcher.isChecked = sharedPrefs.getBoolean(DARK_THEME_KEY, false)
+
+        themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
+            sharedPrefs.edit().putBoolean(DARK_THEME_KEY, checked).apply()
+            (applicationContext as App).switchTheme(checked)
+        }
 
         shareButton.setOnClickListener {
             val message = resources.getString(R.string.message_to_share_with_messegers)
             val shareIntent = Intent(Intent.ACTION_SEND)
             shareIntent.type = resources.getString(R.string.type_for_all_messengers)
             shareIntent.putExtra(Intent.EXTRA_TEXT, message)
-            startActivity(shareIntent)
+            startActivity(Intent.createChooser(shareIntent,resources.getString(R.string.title_share_app)))
         }
 
         supportButton.setOnClickListener {

@@ -11,13 +11,6 @@
         android:orientation="horizontal"
         >
 
-<!--        <ImageView-->
-<!--            style="@style/SettingsIcon"-->
-<!--            >-->
-<!--            -->
-<!--&lt;!&ndash;            style="@style/ArrowBack">&ndash;&gt;-->
-<!--        -->
-<!--        </ImageView>-->
         <Button
             android:id="@+id/arrowBack"
             style="@style/ArrowBack"
@@ -32,16 +25,26 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/block_height"
         android:paddingLeft="@dimen/padding"
-        android:layout_marginTop="@dimen/margin"
+        android:layout_marginTop="@dimen/margin">
 
-        >
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/themeSwitcher"
+            style="@style/SettingActivitySwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="14dp"
+            android:layout_gravity="start|center"
+            android:layout_marginTop="0dp"
+            android:text="Темная тема"
 
-        <Switch
-            style="@style/SettingActivityText"
-            android:text="@string/title_black_theme"
-            >
+            />
 
-        </Switch>
+        <!--        <Switch-->
+<!--            style="@style/SettingActivityText"-->
+<!--            android:text="@string/title_black_theme"-->
+<!--            >-->
+
+<!--        </Switch>-->
 
     </LinearLayout>
 

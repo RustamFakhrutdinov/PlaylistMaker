@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/PlayerActivityScreen">
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/leftBorderForTrackName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="24dp" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/rightBorderForTrackName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="24dp" />
+
+    <ImageButton
+        android:id="@+id/backButton"
+        style="@style/ArrowBackForPlayer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/cover"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="30dp"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="@id/rightBorderForTrackName"
+        app:layout_constraintStart_toStartOf="@id/leftBorderForTrackName"
+        app:layout_constraintTop_toBottomOf="@id/backButton"
+        app:layout_constraintBottom_toTopOf="@id/trackName"
+        app:srcCompat="@drawable/placeholder" />
+
+    <TextView
+        android:id="@+id/trackName"
+        style="@style/TextPlaylist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        app:layout_constrainedWidth="true"
+        android:textSize="22dp"
+        app:layout_constraintStart_toStartOf="@id/cover"
+        app:layout_constraintEnd_toEndOf="@id/cover"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:text="Название трекаfffffffffffffffffffff"
+        />
+    <TextView
+        android:id="@+id/performerName"
+        style="@style/TextPlaylist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="12dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        app:layout_constrainedWidth="true"
+        android:textSize="14dp"
+        app:layout_constraintStart_toStartOf="@id/cover"
+        app:layout_constraintEnd_toEndOf="@id/cover"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/trackName"
+        tools:text="Название трекаffffffffffffffffffffffffffffffffff"
+        />
+
+    <ImageButton
+        android:id="@+id/playlistButton"
+        android:layout_width="51dp"
+        android:layout_height="51dp"
+        android:layout_marginTop="54dp"
+        android:background="@drawable/round_button"
+        android:backgroundTint="@color/icon_grey"
+        android:src="@drawable/playlist_add"
+        app:layout_constraintStart_toStartOf="@id/cover"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintEnd_toStartOf="@+id/playButton"
+        app:layout_constraintTop_toBottomOf="@id/performerName"/>
+
+    <ImageButton
+        style="@style/PlayButton"
+        android:id="@+id/playButton"
+        android:layout_width="83.33dp"
+        android:layout_height="83.33dp"
+        android:layout_marginTop="38.33dp"
+        android:src="@drawable/play"
+        app:layout_constraintStart_toEndOf="@id/playlistButton"
+        app:layout_constraintEnd_toStartOf="@id/favoritesButton"
+        app:layout_constraintTop_toBottomOf="@id/performerName"/>
+    <ImageButton
+        android:id="@+id/favoritesButton"
+        android:layout_width="51dp"
+        android:layout_height="51dp"
+        android:layout_marginTop="54dp"
+        android:background="@drawable/round_button"
+        android:backgroundTint="@color/icon_grey"
+        android:src="@drawable/favorites"
+        app:layout_constraintStart_toEndOf="@id/playButton"
+        app:layout_constraintEnd_toEndOf="@id/cover"
+        app:layout_constraintTop_toBottomOf="@id/performerName"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

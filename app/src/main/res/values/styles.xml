@@ -248,11 +248,14 @@
 
     <style name="PlayButton">
         <item name="android:backgroundTint">@color/white</item>
+        <item name="android:background">@drawable/round_button</item>
     </style>
 
-    android:backgroundTint="@color/white"
-
-
+    <style name="TextPlaylist2">
+        <item name="android:textColor">@color/another_black</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">13sp</item>
+    </style>
 
 
 

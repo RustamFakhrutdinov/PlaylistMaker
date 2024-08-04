@@ -153,6 +153,21 @@ class SearchActivity : AppCompatActivity() {
             historyTracksList.add(0,item)
             trackHistoryAdapter.notifyDataSetChanged()
             SearchHistory(sharedPrefs).write(historyTracksList)
+            val playerIntent = Intent(this, PlayerActivity::class.java)
+            startActivity(playerIntent)
+
+        }
+
+        trackHistoryAdapter.onTrackClickListener = TrackVeiwHolder.OnTrackClickListener {item->
+            historyTracksList.removeIf {it.trackId == item.trackId}
+            if(historyTracksList.size > 9) {
+                historyTracksList.removeLast()
+            }
+            historyTracksList.add(0,item)
+            trackHistoryAdapter.notifyDataSetChanged()
+            SearchHistory(sharedPrefs).write(historyTracksList)
+            val playerIntent = Intent(this, PlayerActivity::class.java)
+            startActivity(playerIntent)
 
         }
 

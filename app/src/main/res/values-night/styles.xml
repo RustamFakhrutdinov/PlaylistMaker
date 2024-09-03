@@ -90,7 +90,7 @@
         <item name="android:fontFamily">@font/ys_display_regular</item>
         <item name="android:hint">@string/hint_search</item>
         <item name="android:inputType">text</item>
-        <item name="android:maxLength">20</item>
+        <item name="android:maxLength">30</item>
         <item name="android:maxLines">1</item>
         <item name="android:paddingLeft">13dp</item>
         <item name="android:textColor">@color/black</item>

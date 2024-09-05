@@ -38,10 +38,12 @@ class SearchActivity : AppCompatActivity() {
 
 
     private lateinit var sharedPrefs : SharedPreferences
+    private lateinit var rvHistoryTrack: RecyclerView
+    private lateinit var historyTracksList: ArrayList<Track>
+
+
+
     private val iTunesService = retrofit.create(ITunesSearchApi::class.java)
-
-
-    //private val historyTrackAdapter = TrackAdapter(historyTracksList)
 
 
     private val tracksList = arrayListOf<Track>()
@@ -57,6 +59,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var historyMessage: TextView
     private lateinit var cleanHistoryButton: Button
 
+    private lateinit var searchRunnable: Runnable
+
     companion object {
         const val SEARCH_NAME = "TEXT_WATCHER_NAME"
         const val NAME_DEF = ""
@@ -65,7 +69,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private var isClickAllowed = true
-    private val searchRunnable = Runnable { search() }
+    //private val searchRunnable = Runnable { search() }
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +77,8 @@ class SearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_search)
 
         sharedPrefs = getSharedPreferences(HISTORY_TRACK_PREFERENCES, MODE_PRIVATE)
-            //val sharedPrefs = getSharedPreferences(DARK_THEME_PREFERENCES, MODE_PRIVATE)
+
+        searchRunnable = Runnable { search() }
 
         placeholderMessage = findViewById(R.id.placeholderMessage)
         placeholderErrorImage = findViewById(R.id.ErrorСover)
@@ -88,10 +93,10 @@ class SearchActivity : AppCompatActivity() {
         historyMessage = findViewById(R.id.historyMessage)
         cleanHistoryButton = findViewById(R.id.cleanHistoryButton)
 
-        val historyTracksList = SearchHistory(sharedPrefs).read()
-        val trackHistoryAdapter =TrackAdapter(historyTracksList)
+        historyTracksList = SearchHistory(sharedPrefs).read()
+        val trackHistoryAdapter = TrackAdapter(historyTracksList)
 
-        val rvHistoryTrack = findViewById<RecyclerView>(R.id.rvHistoryTrack)
+        rvHistoryTrack = findViewById<RecyclerView>(R.id.rvHistoryTrack)
         rvHistoryTrack.adapter = trackHistoryAdapter
 
         inputEditText.setText(editTextValue)
@@ -101,9 +106,11 @@ class SearchActivity : AppCompatActivity() {
         }
 
         clearButton.setOnClickListener {
+            handler.removeCallbacksAndMessages(null)
             inputEditText.setText("")
             tracksList.clear()
             trackAdapter.notifyDataSetChanged()
+            clearViewsWhenEmpty()
         }
 
         placeholderRefreshButton.setOnClickListener {
@@ -111,14 +118,13 @@ class SearchActivity : AppCompatActivity() {
         }
 
         inputEditText.setOnFocusChangeListener { v, hasFocus ->
-            historyMessage.visibility = if (hasFocus && inputEditText.text.isEmpty() && historyTracksList.size != 0) View.VISIBLE else View.GONE
-            cleanHistoryButton.visibility = if (hasFocus && inputEditText.text.isEmpty() && historyTracksList.size != 0) View.VISIBLE else View.GONE
-            rvHistoryTrack.visibility = if (hasFocus && inputEditText.text.isEmpty()&& historyTracksList.size != 0) View.VISIBLE else View.GONE
-            tracksListView.visibility = if (hasFocus && inputEditText.text.isEmpty()) View.GONE else View.VISIBLE
-
+            handler.removeCallbacks(searchRunnable)
+            historyViewsVisibility()
+            if (hasFocus && inputEditText.text.isEmpty()) {
+                tracksList.clear()
+                trackAdapter.notifyDataSetChanged()
+            }
         }
-
-        
 
         val searchTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -126,16 +132,20 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
+                handler.removeCallbacksAndMessages(null)
                 editTextValue = s.toString()
                 clearButton.visibility = clearButtonVisibility(s)
 
-                historyMessage.visibility = if (inputEditText.hasFocus() && inputEditText.text.isEmpty() &&  historyTracksList.size != 0) View.VISIBLE else View.GONE
-                cleanHistoryButton.visibility = if (inputEditText.hasFocus() && inputEditText.text.isEmpty() && historyTracksList.size != 0) View.VISIBLE else View.GONE
-                rvHistoryTrack.visibility = if (inputEditText.hasFocus() && inputEditText.text.isEmpty() && historyTracksList.size != 0) View.VISIBLE else View.GONE
+                historyViewsVisibility()
 
-                tracksListView.visibility = if (inputEditText.hasFocus() && inputEditText.text.isEmpty()) View.GONE else View.VISIBLE
                 searchDebounce()
+
+                if (inputEditText.hasFocus() && inputEditText.text.isEmpty()) {
+                    tracksList.clear()
+                    trackAdapter.notifyDataSetChanged()
+                }
+                clearViewsWhenEmpty()
+
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -147,11 +157,6 @@ class SearchActivity : AppCompatActivity() {
 
         tracksListView = findViewById(R.id.rvTrack)
         tracksListView.adapter = trackAdapter
-
-//        val rvTrack = findViewById<RecyclerView>(R.id.rvTrack)
-//        rvTrack.adapter = trackAdapter
-
-
 
 
         cleanHistoryButton.setOnClickListener {
@@ -165,7 +170,6 @@ class SearchActivity : AppCompatActivity() {
 
 
         trackAdapter.onTrackClickListener = TrackVeiwHolder.OnTrackClickListener { item->
-           // historyTracksList = SearchHistory(sharedPrefs).read()
             if (clickDebounce()) {
                 historyTracksList.removeIf {it.trackId == item.trackId}
                 if(historyTracksList.size > 9) {
@@ -195,15 +199,13 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
-
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                handler.removeCallbacks(searchRunnable)
                 search()
                 true
             }
             false
-
-
         }
     }
 
@@ -217,8 +219,8 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun searchDebounce() {
-        handler.removeCallbacks(searchRunnable)
-        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+            handler.removeCallbacks(searchRunnable)
+            handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
     private fun search() {
         if (inputEditText.text.isNotEmpty()) {
@@ -227,15 +229,20 @@ class SearchActivity : AppCompatActivity() {
             placeholderErrorImage.visibility = View.GONE
             placeholderRefreshButton.visibility = View.GONE
             tracksListView.visibility = View.GONE
+
             progressBar.visibility = View.VISIBLE
 
 
             iTunesService.search(inputEditText.text.toString()).enqueue(object :
                 Callback<TracksResponse> {
+
                 override fun onResponse(call: Call<TracksResponse>,
                                         response: Response<TracksResponse>
                 ) {
                     progressBar.visibility = View.GONE
+                    if (inputEditText.text.isEmpty()) {
+                        return
+                    }
                     if (response.isSuccessful) {
                         tracksList.clear()
                         if (response.body()?.results?.isNotEmpty() == true) {
@@ -273,6 +280,9 @@ class SearchActivity : AppCompatActivity() {
 
                 override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
                     progressBar.visibility = View.GONE
+                    if (inputEditText.text.isEmpty()) {
+                        return
+                    }
                     showMessage(getString(R.string.something_went_wrong), t.message.toString())
                     if(isDarkModeOn()) {
                         placeholderErrorImage.setImageResource(R.drawable.connection_problems_dark_mode)
@@ -338,6 +348,25 @@ class SearchActivity : AppCompatActivity() {
             View.GONE
         } else {
             View.VISIBLE
+        }
+    }
+
+    private fun clearViewsWhenEmpty() {
+        progressBar.visibility = View.GONE
+        placeholderMessage.visibility = View.GONE
+        placeholderErrorImage.visibility = View.GONE
+        placeholderRefreshButton.visibility = View.GONE
+    }
+
+    private fun historyViewsVisibility() {
+        if (inputEditText.hasFocus() && inputEditText.text.isEmpty() &&  historyTracksList.size != 0) {
+            historyMessage.visibility = View.VISIBLE
+            cleanHistoryButton.visibility = View.VISIBLE
+            rvHistoryTrack.visibility = View.VISIBLE
+        } else {
+            historyMessage.visibility = View.GONE
+            cleanHistoryButton.visibility = View.GONE
+            rvHistoryTrack.visibility = View.GONE
         }
     }
 

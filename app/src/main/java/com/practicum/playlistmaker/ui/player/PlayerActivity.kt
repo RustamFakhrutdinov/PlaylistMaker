@@ -1,15 +1,12 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.ui.player
 
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,14 +14,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.google.android.material.internal.ViewUtils.dpToPx
+import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.domain.models.Track
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerActivity: AppCompatActivity() {
-
-    private lateinit var sharedPrefs : SharedPreferences
-
     private lateinit var cover: ImageView
     private lateinit var trackName: TextView
     private lateinit var trackPerformer: TextView
@@ -63,14 +59,14 @@ class PlayerActivity: AppCompatActivity() {
 
         mainThreadHandler = Handler(Looper.getMainLooper())
         updateTimerTask = createUpdateTimerTask()
-        sharedPrefs = getSharedPreferences(HISTORY_TRACK_PREFERENCES, MODE_PRIVATE)
 
         val backButton = findViewById<ImageButton>(R.id.backButtonPlayer)
-        track = SearchHistory(sharedPrefs).read()[0]
+        track = Creator.provideSearchHistoryInteractor(this).readFromHistory()[0]
+        //track = SearchHistory(this).readFromHistory()[0]
 
         initializeViews()
 
-        addInformation(sharedPrefs)
+        addInformation()
 
         backButton.setOnClickListener {
             finish()
@@ -160,10 +156,10 @@ class PlayerActivity: AppCompatActivity() {
         }
     }
 
-    private fun addInformation(sharedPreferences: SharedPreferences) {
+    private fun addInformation() {
         trackName.text = track.trackName
         trackPerformer.text = track.artistName
-        trackDuration.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
+        trackDuration.text = track.trackTime
         if (track.collectionName != null) {
             trackAlbum.text = track.collectionName
         } else {

@@ -1,25 +1,29 @@
 package com.practicum.playlistmaker.data.repository
 
+import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.practicum.playlistmaker.domain.history.SearchHistoryRepository
 import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.presentation.App
 
-const val HISTORY_TRACK_PREFERENCES = "history_track_preferences"
+
+
 const val HISTORY_TRACK_KEY = "key_for_history_track"
+const val HISTORY_TRACK_PREFERENCES = "history_track_preferences"
 
 
+class SearchHistoryRepositoryImpl(): SearchHistoryRepository {
 
-
-class SearchHistoryRepositoryImpl(private val context: Context): SearchHistoryRepository {
-    private val sharedPreferences = context.getSharedPreferences(HISTORY_TRACK_PREFERENCES, Context.MODE_PRIVATE)
-
+    private val context = App.getAppContext()
+    private val sharedPrefs = context.getSharedPreferences(HISTORY_TRACK_PREFERENCES, Application.MODE_PRIVATE)
 
 
     override fun readFromHistory(): ArrayList<Track> {
 
-        val json: String? = sharedPreferences.getString(HISTORY_TRACK_KEY, null) ?: return arrayListOf()
+        val json: String? = sharedPrefs.getString(HISTORY_TRACK_KEY, null) ?: return arrayListOf()
         val itemType = object : TypeToken<List<Track>>() {}.type
         return Gson().fromJson(json, itemType)
 
@@ -29,7 +33,7 @@ class SearchHistoryRepositoryImpl(private val context: Context): SearchHistoryRe
     // запись
     override fun saveToHistory(tracks: ArrayList<Track>) {
         val json = Gson().toJson(tracks)
-        sharedPreferences.edit()
+        sharedPrefs.edit()
             .putString(HISTORY_TRACK_KEY, json)
             .apply()
     }

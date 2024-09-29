@@ -9,25 +9,32 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class TracksRepositoryImpl(private val networkClient: NetworkClient) : TracksRepository {
+    private var resultResponseCode: Int = 0
+
     override fun search(expression: String): List<Track> {
         val response = networkClient.doRequest(TracksSearchRequest(expression))
+        resultResponseCode = response.resultCode
         if (response.resultCode == 200) {
             return (response as TracksResponse).results.map {
                 Track(
-                    it.trackName,
-                    it.artistName,
-                    SimpleDateFormat("mm:ss", Locale.getDefault()).format(it.trackTimeMillis),
-                    //it.trackTimeMillis,
-                    it.artworkUrl100,
-                    it.trackId,
-                    it.collectionName,
-                    it.releaseDate,
-                    it.primaryGenreName,
-                    it.country,
-                    it.previewUrl)
+                    it.trackName?:"No track name",
+                    it.artistName?: "No artist name",
+                    SimpleDateFormat("mm:ss", Locale.getDefault()).format(it.trackTimeMillis?:0L),
+                    it.artworkUrl100?:"No artworkUrl",
+                    it.trackId?:0,
+                    it.collectionName?:"No collection name",
+                    it.releaseDate?:"No release date",
+                    it.primaryGenreName?:"No primary genre name",
+                    it.country?:"No country",
+                    it.previewUrl?:"No previewUrl")
             }
         } else {
+            resultResponseCode = response.resultCode
             return emptyList()
         }
+    }
+
+    override fun getResultCode():Int {
+        return resultResponseCode
     }
 }

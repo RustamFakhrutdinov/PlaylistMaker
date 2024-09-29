@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.ui.track
+package com.practicum.playlistmaker.presentation.ui.track
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -23,8 +23,5 @@ class TrackAdapter (private val tracks: ArrayList<Track>?) : RecyclerView.Adapte
         return tracks?.size ?: 0
     }
 
-    fun onTrackClick(track: Track) {
-        
-    }
 
 }

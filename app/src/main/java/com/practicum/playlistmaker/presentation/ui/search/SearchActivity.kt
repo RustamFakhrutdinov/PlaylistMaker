@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.ui.search
+package com.practicum.playlistmaker.presentation.ui.search
 
 import android.content.Intent
 import android.content.res.Configuration
@@ -20,23 +20,19 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.Creator
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.ui.track.TrackAdapter
-import com.practicum.playlistmaker.ui.track.TrackVeiwHolder
+import com.practicum.playlistmaker.presentation.ui.track.TrackAdapter
+import com.practicum.playlistmaker.presentation.ui.track.TrackVeiwHolder
 import com.practicum.playlistmaker.domain.api.TracksInteractor
 import com.practicum.playlistmaker.domain.models.Track
-import com.practicum.playlistmaker.ui.player.PlayerActivity
-
+import com.practicum.playlistmaker.presentation.ui.player.PlayerActivity
 
 class SearchActivity : AppCompatActivity() {
     private var editTextValue: String = NAME_DEF
 
-    //private lateinit var sharedPrefs : SharedPreferences
+//    private lateinit var rvHistoryTrack: RecyclerView
+//    private lateinit var historyTracksList: ArrayList<Track>
+
     private lateinit var rvHistoryTrack: RecyclerView
-    private lateinit var historyTracksList: ArrayList<Track>
-
-    private val tracksList = arrayListOf<Track>()
-    private val trackAdapter = TrackAdapter(tracksList)
-
     private lateinit var tracksListView: RecyclerView
     private lateinit var placeholderMessage: TextView
     private lateinit var placeholderErrorImage: ImageView
@@ -49,21 +45,22 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var searchRunnable: Runnable
 
-    companion object {
-        const val SEARCH_NAME = "TEXT_WATCHER_NAME"
-        const val NAME_DEF = ""
-        private const val SEARCH_DEBOUNCE_DELAY = 2000L
-        private const val CLICK_DEBOUNCE_DELAY = 1000L
-    }
+    private val tracksList = arrayListOf<Track>()
+    private val trackAdapter = TrackAdapter(tracksList)
+
+
+    private var historyTracksList = arrayListOf<Track>()
+
 
     private var isClickAllowed = true
     private val handler = Handler(Looper.getMainLooper())
 
+    private val tracksInteractor = Creator.provideTracksInteractor()
+    private val searchHistoryInteractor = Creator.provideSearchHistoryInteractor()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-
-       // sharedPrefs = getSharedPreferences(HISTORY_TRACK_PREFERENCES, MODE_PRIVATE)
 
         searchRunnable = Runnable { search() }
 
@@ -80,8 +77,7 @@ class SearchActivity : AppCompatActivity() {
         historyMessage = findViewById(R.id.historyMessage)
         cleanHistoryButton = findViewById(R.id.cleanHistoryButton)
 
-        //historyTracksList = SearchHistory(this).readFromHistory()
-        historyTracksList = Creator.provideSearchHistoryInteractor(this).readFromHistory()
+        historyTracksList = searchHistoryInteractor.readFromHistory()
 
         val trackHistoryAdapter = TrackAdapter(historyTracksList)
 
@@ -150,8 +146,7 @@ class SearchActivity : AppCompatActivity() {
 
         cleanHistoryButton.setOnClickListener {
             historyTracksList.clear()
-            Creator.provideSearchHistoryInteractor(this).saveToHistory(historyTracksList)
-            //SearchHistory(this).saveToHistory(historyTracksList)
+            searchHistoryInteractor.saveToHistory(historyTracksList)
             trackHistoryAdapter.notifyDataSetChanged()
             historyMessage.visibility = View.GONE
             cleanHistoryButton.visibility = View.GONE
@@ -167,8 +162,7 @@ class SearchActivity : AppCompatActivity() {
                 }
                 historyTracksList.add(0,item)
                 trackHistoryAdapter.notifyDataSetChanged()
-                Creator.provideSearchHistoryInteractor(this).saveToHistory(historyTracksList)
-                //SearchHistory(this).saveToHistory(historyTracksList)
+                searchHistoryInteractor.saveToHistory(historyTracksList)
                 val playerIntent = Intent(this, PlayerActivity::class.java)
                 startActivity(playerIntent)
             }
@@ -184,8 +178,7 @@ class SearchActivity : AppCompatActivity() {
                 }
                 historyTracksList.add(0,item)
                 trackHistoryAdapter.notifyDataSetChanged()
-                Creator.provideSearchHistoryInteractor(this).saveToHistory(historyTracksList)
-                //SearchHistory(this).saveToHistory(historyTracksList)
+                searchHistoryInteractor.saveToHistory(historyTracksList)
                 val playerIntent = Intent(this, PlayerActivity::class.java)
                 startActivity(playerIntent)
             }
@@ -222,33 +215,52 @@ class SearchActivity : AppCompatActivity() {
             placeholderRefreshButton.visibility = View.GONE
             tracksListView.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
-            Creator.provideTracksInteractor().search(inputEditText.text.toString(),object : TracksInteractor.TracksConsumer {
-                override fun consume(foundTracks: List<Track>) {
-                    handler.post {
-                        progressBar.visibility = View.GONE
-                        if (inputEditText.text.isNotEmpty()) {
-                            tracksList.clear()
-                            if (foundTracks.isNotEmpty()) {
-                                tracksListView.visibility = View.VISIBLE
-                                tracksList.addAll(foundTracks)
-                                trackAdapter.notifyDataSetChanged()
-                            }
-                            if (tracksList.isEmpty()) {
-                                showMessage(getString(R.string.nothing_found), "")
-                                if(isDarkModeOn()) {
-                                    placeholderErrorImage.setImageResource(R.drawable.nothing_found_dark_mode)
-                                } else {
-                                    placeholderErrorImage.setImageResource(R.drawable.nothing_found_light_mode)
+            tracksInteractor.search(inputEditText.text.toString(),object : TracksInteractor.TracksConsumer {
+                override fun consume(foundTracks: List<Track>, response: Int) {
+                    if (response == 200) {
+                        handler.post {
+                            progressBar.visibility = View.GONE
+                            if (inputEditText.text.isNotEmpty()) {
+                                tracksList.clear()
+                                if (foundTracks.isNotEmpty()) {
+                                    tracksListView.visibility = View.VISIBLE
+                                    tracksList.addAll(foundTracks)
+                                    trackAdapter.notifyDataSetChanged()
                                 }
-                                showErrorImage(getString(R.string.nothing_found), "")
-                                showRefreshButton("","")
-                            } else {
-                                hideMessage()
-                                showErrorImage("", "")
-                                showRefreshButton("","")
+                                if (tracksList.isEmpty()) {
+                                    showMessage(getString(R.string.nothing_found), "")
+                                    if(isDarkModeOn()) {
+                                        placeholderErrorImage.setImageResource(R.drawable.nothing_found_dark_mode)
+                                    } else {
+                                        placeholderErrorImage.setImageResource(R.drawable.nothing_found_light_mode)
+                                    }
+                                    showErrorImage(getString(R.string.nothing_found), "")
+                                    showRefreshButton("","")
+                                } else {
+                                    hideMessage()
+                                    showErrorImage("", "")
+                                    showRefreshButton("","")
+                                }
                             }
                         }
+                    } else {
+                        handler.post {
+                            progressBar.visibility = View.GONE
+                            showMessage(
+                                getString(R.string.something_went_wrong),
+                                response.toString()
+                            )
+                            if (isDarkModeOn()) {
+                                placeholderErrorImage.setImageResource(R.drawable.connection_problems_dark_mode)
+                                showRefreshButton(getString(R.string.something_went_wrong), "")
+                            } else {
+                                placeholderErrorImage.setImageResource(R.drawable.connection_problems_light_mode)
+                                showRefreshButton(getString(R.string.something_went_wrong), "")
+                            }
+                            showErrorImage(getString(R.string.something_went_wrong), "")
+                        }
                     }
+
                 }
             })
         }
@@ -295,8 +307,7 @@ class SearchActivity : AppCompatActivity() {
     }
     fun isDarkModeOn(): Boolean {
         val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        val isDarkModeOn = nightModeFlags == Configuration.UI_MODE_NIGHT_YES
-        return isDarkModeOn
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES
     }
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {
@@ -333,6 +344,13 @@ class SearchActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         editTextValue = savedInstanceState.getString(SEARCH_NAME, NAME_DEF)
+    }
+
+    companion object {
+        const val SEARCH_NAME = "TEXT_WATCHER_NAME"
+        const val NAME_DEF = ""
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
 
 }

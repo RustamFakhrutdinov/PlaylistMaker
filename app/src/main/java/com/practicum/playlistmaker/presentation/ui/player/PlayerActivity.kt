@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.ui.player
+package com.practicum.playlistmaker.presentation.ui.player
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -17,10 +17,11 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.Creator
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.domain.player.MediaPlayerListener
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class PlayerActivity: AppCompatActivity() {
+class PlayerActivity: AppCompatActivity(), MediaPlayerListener {
     private lateinit var cover: ImageView
     private lateinit var trackName: TextView
     private lateinit var trackPerformer: TextView
@@ -36,22 +37,11 @@ class PlayerActivity: AppCompatActivity() {
 
     private lateinit var track: Track
     private lateinit var updateTimerTask: Runnable
-    private lateinit var mediaPlayer: MediaPlayer
-
-    companion object {
-        private const val STATE_DEFAULT = 0
-        private const val STATE_PREPARED = 1
-        private const val STATE_PLAYING = 2
-        private const val STATE_PAUSED = 3
-        private const val TIMER_DELAY = 500L
-
-        // Число миллисекунд в одной секунде
-        private const val DELAY = 1000L
-    }
 
     private var mainThreadHandler: Handler? = null
 
-    private var playerState = STATE_DEFAULT
+    private val playerInteractor = Creator.providePlayerInteractor()
+    private val searchHistoryInteractor = Creator.provideSearchHistoryInteractor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,8 +51,7 @@ class PlayerActivity: AppCompatActivity() {
         updateTimerTask = createUpdateTimerTask()
 
         val backButton = findViewById<ImageButton>(R.id.backButtonPlayer)
-        track = Creator.provideSearchHistoryInteractor(this).readFromHistory()[0]
-        //track = SearchHistory(this).readFromHistory()[0]
+        track = searchHistoryInteractor.readFromHistory()[0]
 
         initializeViews()
 
@@ -72,10 +61,9 @@ class PlayerActivity: AppCompatActivity() {
             finish()
         }
 
-        preparePlayer(track.previewUrl)
-
+        playerInteractor.preparePlayer(track.previewUrl,this)
         playButton.setOnClickListener {
-            playbackControl()
+            playerInteractor.playbackControl(this)
         }
 
 
@@ -83,13 +71,13 @@ class PlayerActivity: AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        pausePlayer()
+        playerInteractor.pausePlayer(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mainThreadHandler?.removeCallbacksAndMessages(null)
-        mediaPlayer.release()
+        playerInteractor.getMediaPlayer().release()
     }
 
     private fun initializeViews() {
@@ -109,49 +97,8 @@ class PlayerActivity: AppCompatActivity() {
     private fun createUpdateTimerTask(): Runnable {
         return object : Runnable {
             override fun run() {
-                trackTime.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(mediaPlayer.currentPosition)
+                trackTime.text = playerInteractor.getTime()
                 mainThreadHandler?.postDelayed(this, TIMER_DELAY)
-            }
-        }
-    }
-
-    private fun preparePlayer(previewUrl: String) {
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(previewUrl)
-            prepareAsync()
-            setOnPreparedListener {
-                playerState = STATE_PREPARED
-            }
-            setOnCompletionListener {
-                playButton.setImageResource(R.drawable.play)
-                playerState = STATE_PREPARED
-                mainThreadHandler?.removeCallbacks(updateTimerTask)
-                trackTime.text = "00:00"
-            }
-        }
-    }
-
-    private fun startPlayer() {
-        mediaPlayer.start()
-        playButton.setImageResource(R.drawable.pause)
-        playerState = STATE_PLAYING
-        mainThreadHandler?.post(updateTimerTask)
-    }
-
-    private fun pausePlayer() {
-        mainThreadHandler?.removeCallbacks(updateTimerTask)
-        mediaPlayer.pause()
-        playButton.setImageResource(R.drawable.play)
-        playerState = STATE_PAUSED
-    }
-
-    private fun playbackControl() {
-        when(playerState) {
-            STATE_PLAYING -> {
-                pausePlayer()
-            }
-            STATE_PREPARED, STATE_PAUSED -> {
-                startPlayer()
             }
         }
     }
@@ -183,5 +130,25 @@ class PlayerActivity: AppCompatActivity() {
             TypedValue.COMPLEX_UNIT_DIP,
             dp,
             context.resources.displayMetrics).toInt()
+    }
+
+    override fun onPlayerCompletion() {
+        playButton.setImageResource(R.drawable.play)
+        mainThreadHandler?.removeCallbacks(updateTimerTask)
+        trackTime.text = "00:00"
+    }
+
+    override fun onPlayerStart() {
+        playButton.setImageResource(R.drawable.pause)
+        mainThreadHandler?.post(updateTimerTask)
+    }
+
+    override fun onPlayerPause() {
+        mainThreadHandler?.removeCallbacks(updateTimerTask)
+        playButton.setImageResource(R.drawable.play)
+    }
+
+    companion object {
+        private const val TIMER_DELAY = 500L
     }
 }

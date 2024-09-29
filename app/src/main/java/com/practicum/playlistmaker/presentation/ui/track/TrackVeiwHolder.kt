@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.ui.track
+package com.practicum.playlistmaker.presentation.ui.track
 
 import android.content.Context
 import android.util.TypedValue

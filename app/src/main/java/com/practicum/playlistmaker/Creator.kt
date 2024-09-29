@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker
 
-import android.content.Context
 import com.practicum.playlistmaker.data.network.RetrofitNetworkClient
 import com.practicum.playlistmaker.data.network.TracksRepositoryImpl
 import com.practicum.playlistmaker.data.repository.PlayerRepositoryImpl
@@ -18,6 +17,7 @@ import com.practicum.playlistmaker.domain.player.PlayerInteractor
 import com.practicum.playlistmaker.domain.player.PlayerRepository
 import com.practicum.playlistmaker.domain.settings.SettingsInteractor
 import com.practicum.playlistmaker.domain.settings.SettingsRepository
+import com.practicum.playlistmaker.presentation.App
 
 object Creator {
     private fun getTracksRepository(): TracksRepository {
@@ -29,7 +29,7 @@ object Creator {
     }
 
     private fun getSearchHistoryRepository() : SearchHistoryRepository {
-        return SearchHistoryRepositoryImpl()
+        return SearchHistoryRepositoryImpl(App.getAppContext())
     }
 
      fun provideSearchHistoryInteractor() : SearchHistoryInteractor {
@@ -37,7 +37,7 @@ object Creator {
     }
 
     private fun getSettingsRepository() : SettingsRepository {
-        return SettingsRepositoryImpl()
+        return SettingsRepositoryImpl(App.getAppContext())
     }
 
     fun provideSettingsInteractor() : SettingsInteractor {

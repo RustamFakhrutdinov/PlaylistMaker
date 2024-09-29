@@ -229,11 +229,7 @@ class SearchActivity : AppCompatActivity() {
                                 }
                                 if (tracksList.isEmpty()) {
                                     showMessage(getString(R.string.nothing_found), "")
-                                    if(isDarkModeOn()) {
-                                        placeholderErrorImage.setImageResource(R.drawable.nothing_found_dark_mode)
-                                    } else {
-                                        placeholderErrorImage.setImageResource(R.drawable.nothing_found_light_mode)
-                                    }
+                                    placeholderErrorImage.setImageResource(R.drawable.nothing_found)
                                     showErrorImage(getString(R.string.nothing_found), "")
                                     showRefreshButton("","")
                                 } else {
@@ -250,13 +246,8 @@ class SearchActivity : AppCompatActivity() {
                                 getString(R.string.something_went_wrong),
                                 response.toString()
                             )
-                            if (isDarkModeOn()) {
-                                placeholderErrorImage.setImageResource(R.drawable.connection_problems_dark_mode)
-                                showRefreshButton(getString(R.string.something_went_wrong), "")
-                            } else {
-                                placeholderErrorImage.setImageResource(R.drawable.connection_problems_light_mode)
-                                showRefreshButton(getString(R.string.something_went_wrong), "")
-                            }
+                            placeholderErrorImage.setImageResource(R.drawable.connection_problems)
+                            showRefreshButton(getString(R.string.something_went_wrong), "")
                             showErrorImage(getString(R.string.something_went_wrong), "")
                         }
                     }
@@ -304,10 +295,6 @@ class SearchActivity : AppCompatActivity() {
         } else {
             placeholderRefreshButton.visibility = View.GONE
         }
-    }
-    fun isDarkModeOn(): Boolean {
-        val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES
     }
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {

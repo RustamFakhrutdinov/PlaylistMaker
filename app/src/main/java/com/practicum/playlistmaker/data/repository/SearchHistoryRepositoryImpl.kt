@@ -2,12 +2,10 @@ package com.practicum.playlistmaker.data.repository
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.practicum.playlistmaker.domain.history.SearchHistoryRepository
 import com.practicum.playlistmaker.domain.models.Track
-import com.practicum.playlistmaker.presentation.App
 
 
 
@@ -15,9 +13,7 @@ const val HISTORY_TRACK_KEY = "key_for_history_track"
 const val HISTORY_TRACK_PREFERENCES = "history_track_preferences"
 
 
-class SearchHistoryRepositoryImpl(): SearchHistoryRepository {
-
-    private val context = App.getAppContext()
+class SearchHistoryRepositoryImpl(context: Context): SearchHistoryRepository {
     private val sharedPrefs = context.getSharedPreferences(HISTORY_TRACK_PREFERENCES, Application.MODE_PRIVATE)
 
 

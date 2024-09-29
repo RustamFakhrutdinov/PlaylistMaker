@@ -1,11 +1,8 @@
 package com.practicum.playlistmaker.data.repository
 
 import android.media.MediaPlayer
-import android.net.Uri
-import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.domain.player.MediaPlayerListener
 import com.practicum.playlistmaker.domain.player.PlayerRepository
-import com.practicum.playlistmaker.presentation.App
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -57,8 +54,8 @@ class PlayerRepositoryImpl: PlayerRepository {
         }
     }
 
-    override fun getMediaPlayer(): MediaPlayer {
-        return mediaPlayer
+    override fun releaseMediaPlayer() {
+        mediaPlayer.release()
     }
 
 

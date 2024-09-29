@@ -77,7 +77,7 @@ class PlayerActivity: AppCompatActivity(), MediaPlayerListener {
     override fun onDestroy() {
         super.onDestroy()
         mainThreadHandler?.removeCallbacksAndMessages(null)
-        playerInteractor.getMediaPlayer().release()
+        playerInteractor.releaseMediaPlayer()
     }
 
     private fun initializeViews() {

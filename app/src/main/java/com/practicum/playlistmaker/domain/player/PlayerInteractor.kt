@@ -1,7 +1,5 @@
 package com.practicum.playlistmaker.domain.player
 
-import android.media.MediaPlayer
-
 interface PlayerInteractor {
     fun startPlayer(listener: MediaPlayerListener)
 
@@ -13,5 +11,5 @@ interface PlayerInteractor {
 
     fun playbackControl(listener: MediaPlayerListener)
 
-    fun getMediaPlayer(): MediaPlayer
+    fun releaseMediaPlayer()
 }

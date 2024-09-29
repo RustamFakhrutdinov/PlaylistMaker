@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker.domain.impl
 
-import android.media.MediaPlayer
 import com.practicum.playlistmaker.domain.player.MediaPlayerListener
 import com.practicum.playlistmaker.domain.player.PlayerInteractor
 import com.practicum.playlistmaker.domain.player.PlayerRepository
@@ -26,7 +25,7 @@ class PlayerInteractorImpl(private val repository: PlayerRepository): PlayerInte
        repository.playbackControl(listener)
     }
 
-    override fun getMediaPlayer(): MediaPlayer {
-        return repository.getMediaPlayer()
+    override fun releaseMediaPlayer() {
+        repository.releaseMediaPlayer()
     }
 }

@@ -1,17 +1,18 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation.ui.settings
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.ActionMenuView
 import android.widget.Button
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.presentation.App
+import com.practicum.playlistmaker.R
 
-const val DARK_THEME_PREFERENCES = "dark_theme_preferences"
-const val DARK_THEME_KEY = "key_for_dark_theme"
+
 class SettingsActivity : AppCompatActivity() {
+    private val settingsInteractor = Creator.provideSettingsInteractor()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -22,18 +23,14 @@ class SettingsActivity : AppCompatActivity() {
         val backButton = findViewById<Button>(R.id.arrowBack)
 
         backButton.setOnClickListener {
-//            val mainIntent = Intent(this, MainActivity::class.java)
-//            startActivity(mainIntent)
             finish()
         }
-
-        val sharedPrefs = getSharedPreferences(DARK_THEME_PREFERENCES, MODE_PRIVATE)
         val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
 
-        themeSwitcher.isChecked = sharedPrefs.getBoolean(DARK_THEME_KEY, false)
+        themeSwitcher.isChecked = Creator.provideSettingsInteractor().getDarkThemeState()
 
         themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
-            sharedPrefs.edit().putBoolean(DARK_THEME_KEY, checked).apply()
+            settingsInteractor.saveDarkThemeState(checked)
             (applicationContext as App).switchTheme(checked)
         }
 

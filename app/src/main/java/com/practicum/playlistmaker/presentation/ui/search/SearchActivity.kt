@@ -1,7 +1,6 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation.ui.search
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -19,36 +18,21 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-
+import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.presentation.ui.track.TrackAdapter
+import com.practicum.playlistmaker.presentation.ui.track.TrackVeiwHolder
+import com.practicum.playlistmaker.domain.api.TracksInteractor
+import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.presentation.ui.player.PlayerActivity
 
 class SearchActivity : AppCompatActivity() {
-
-    private val itunesBaseUrl = "https://itunes.apple.com"
     private var editTextValue: String = NAME_DEF
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(itunesBaseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
 
+//    private lateinit var rvHistoryTrack: RecyclerView
+//    private lateinit var historyTracksList: ArrayList<Track>
 
-    private lateinit var sharedPrefs : SharedPreferences
     private lateinit var rvHistoryTrack: RecyclerView
-    private lateinit var historyTracksList: ArrayList<Track>
-
-
-
-    private val iTunesService = retrofit.create(ITunesSearchApi::class.java)
-
-
-    private val tracksList = arrayListOf<Track>()
-    private val trackAdapter =TrackAdapter(tracksList)
-
     private lateinit var tracksListView: RecyclerView
     private lateinit var placeholderMessage: TextView
     private lateinit var placeholderErrorImage: ImageView
@@ -61,22 +45,22 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var searchRunnable: Runnable
 
-    companion object {
-        const val SEARCH_NAME = "TEXT_WATCHER_NAME"
-        const val NAME_DEF = ""
-        private const val SEARCH_DEBOUNCE_DELAY = 2000L
-        private const val CLICK_DEBOUNCE_DELAY = 1000L
-    }
+    private val tracksList = arrayListOf<Track>()
+    private val trackAdapter = TrackAdapter(tracksList)
+
+
+    private var historyTracksList = arrayListOf<Track>()
+
 
     private var isClickAllowed = true
-    //private val searchRunnable = Runnable { search() }
     private val handler = Handler(Looper.getMainLooper())
+
+    private val tracksInteractor = Creator.provideTracksInteractor()
+    private val searchHistoryInteractor = Creator.provideSearchHistoryInteractor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-
-        sharedPrefs = getSharedPreferences(HISTORY_TRACK_PREFERENCES, MODE_PRIVATE)
 
         searchRunnable = Runnable { search() }
 
@@ -93,7 +77,8 @@ class SearchActivity : AppCompatActivity() {
         historyMessage = findViewById(R.id.historyMessage)
         cleanHistoryButton = findViewById(R.id.cleanHistoryButton)
 
-        historyTracksList = SearchHistory(sharedPrefs).read()
+        historyTracksList = searchHistoryInteractor.readFromHistory()
+
         val trackHistoryAdapter = TrackAdapter(historyTracksList)
 
         rvHistoryTrack = findViewById<RecyclerView>(R.id.rvHistoryTrack)
@@ -161,7 +146,7 @@ class SearchActivity : AppCompatActivity() {
 
         cleanHistoryButton.setOnClickListener {
             historyTracksList.clear()
-            SearchHistory(sharedPrefs).write(historyTracksList)
+            searchHistoryInteractor.saveToHistory(historyTracksList)
             trackHistoryAdapter.notifyDataSetChanged()
             historyMessage.visibility = View.GONE
             cleanHistoryButton.visibility = View.GONE
@@ -177,7 +162,7 @@ class SearchActivity : AppCompatActivity() {
                 }
                 historyTracksList.add(0,item)
                 trackHistoryAdapter.notifyDataSetChanged()
-                SearchHistory(sharedPrefs).write(historyTracksList)
+                searchHistoryInteractor.saveToHistory(historyTracksList)
                 val playerIntent = Intent(this, PlayerActivity::class.java)
                 startActivity(playerIntent)
             }
@@ -185,7 +170,7 @@ class SearchActivity : AppCompatActivity() {
 
         }
 
-        trackHistoryAdapter.onTrackClickListener = TrackVeiwHolder.OnTrackClickListener {item->
+        trackHistoryAdapter.onTrackClickListener = TrackVeiwHolder.OnTrackClickListener { item->
             if (clickDebounce()) {
                 historyTracksList.removeIf {it.trackId == item.trackId}
                 if(historyTracksList.size > 9) {
@@ -193,7 +178,7 @@ class SearchActivity : AppCompatActivity() {
                 }
                 historyTracksList.add(0,item)
                 trackHistoryAdapter.notifyDataSetChanged()
-                SearchHistory(sharedPrefs).write(historyTracksList)
+                searchHistoryInteractor.saveToHistory(historyTracksList)
                 val playerIntent = Intent(this, PlayerActivity::class.java)
                 startActivity(playerIntent)
             }
@@ -229,72 +214,45 @@ class SearchActivity : AppCompatActivity() {
             placeholderErrorImage.visibility = View.GONE
             placeholderRefreshButton.visibility = View.GONE
             tracksListView.visibility = View.GONE
-
             progressBar.visibility = View.VISIBLE
-
-
-            iTunesService.search(inputEditText.text.toString()).enqueue(object :
-                Callback<TracksResponse> {
-
-                override fun onResponse(call: Call<TracksResponse>,
-                                        response: Response<TracksResponse>
-                ) {
-                    progressBar.visibility = View.GONE
-                    if (inputEditText.text.isEmpty()) {
-                        return
-                    }
-                    if (response.isSuccessful) {
-                        tracksList.clear()
-                        if (response.body()?.results?.isNotEmpty() == true) {
-                            tracksListView.visibility = View.VISIBLE
-                            tracksList.addAll(response.body()?.results!!)
-                            trackAdapter.notifyDataSetChanged()
-                        }
-                        if (tracksList.isEmpty()) {
-                            showMessage(getString(R.string.nothing_found), "")
-                            if(isDarkModeOn()) {
-                                placeholderErrorImage.setImageResource(R.drawable.nothing_found_dark_mode)
-                            } else {
-                                placeholderErrorImage.setImageResource(R.drawable.nothing_found_light_mode)
+            tracksInteractor.search(inputEditText.text.toString(),object : TracksInteractor.TracksConsumer {
+                override fun consume(foundTracks: List<Track>, response: Int) {
+                    if (response == 200) {
+                        handler.post {
+                            progressBar.visibility = View.GONE
+                            if (inputEditText.text.isNotEmpty()) {
+                                tracksList.clear()
+                                if (foundTracks.isNotEmpty()) {
+                                    tracksListView.visibility = View.VISIBLE
+                                    tracksList.addAll(foundTracks)
+                                    trackAdapter.notifyDataSetChanged()
+                                }
+                                if (tracksList.isEmpty()) {
+                                    showMessage(getString(R.string.nothing_found), "")
+                                    placeholderErrorImage.setImageResource(R.drawable.nothing_found)
+                                    showErrorImage(getString(R.string.nothing_found), "")
+                                    showRefreshButton("","")
+                                } else {
+                                    hideMessage()
+                                    showErrorImage("", "")
+                                    showRefreshButton("","")
+                                }
                             }
-                            showErrorImage(getString(R.string.nothing_found), "")
-                            showRefreshButton("","")
-                        } else {
-                            hideMessage()
-                            showErrorImage("", "")
-                            showRefreshButton("","")
                         }
                     } else {
-                        showMessage(getString(R.string.something_went_wrong), response.code().toString())
-                        if(isDarkModeOn()) {
-                            placeholderErrorImage.setImageResource(R.drawable.connection_problems_dark_mode)
+                        handler.post {
+                            progressBar.visibility = View.GONE
+                            showMessage(
+                                getString(R.string.something_went_wrong),
+                                response.toString()
+                            )
+                            placeholderErrorImage.setImageResource(R.drawable.connection_problems)
                             showRefreshButton(getString(R.string.something_went_wrong), "")
-                        } else {
-                            placeholderErrorImage.setImageResource(R.drawable.connection_problems_light_mode)
-                            showRefreshButton(getString(R.string.something_went_wrong), "")
+                            showErrorImage(getString(R.string.something_went_wrong), "")
                         }
-
-                        showErrorImage(getString(R.string.something_went_wrong), "")
                     }
+
                 }
-
-                override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                    progressBar.visibility = View.GONE
-                    if (inputEditText.text.isEmpty()) {
-                        return
-                    }
-                    showMessage(getString(R.string.something_went_wrong), t.message.toString())
-                    if(isDarkModeOn()) {
-                        placeholderErrorImage.setImageResource(R.drawable.connection_problems_dark_mode)
-                        showRefreshButton(getString(R.string.something_went_wrong), "")
-                    } else {
-                        placeholderErrorImage.setImageResource(R.drawable.connection_problems_light_mode)
-                        showRefreshButton(getString(R.string.something_went_wrong), "")
-                    }
-
-                    showErrorImage(getString(R.string.something_went_wrong), "")
-                }
-
             })
         }
     }
@@ -338,11 +296,6 @@ class SearchActivity : AppCompatActivity() {
             placeholderRefreshButton.visibility = View.GONE
         }
     }
-    fun isDarkModeOn(): Boolean {
-        val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        val isDarkModeOn = nightModeFlags == Configuration.UI_MODE_NIGHT_YES
-        return isDarkModeOn
-    }
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {
             View.GONE
@@ -378,6 +331,13 @@ class SearchActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         editTextValue = savedInstanceState.getString(SEARCH_NAME, NAME_DEF)
+    }
+
+    companion object {
+        const val SEARCH_NAME = "TEXT_WATCHER_NAME"
+        const val NAME_DEF = ""
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
 
 }

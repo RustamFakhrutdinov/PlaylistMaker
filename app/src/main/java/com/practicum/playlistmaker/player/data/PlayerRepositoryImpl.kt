@@ -3,35 +3,39 @@ package com.practicum.playlistmaker.player.data
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
 import com.practicum.playlistmaker.player.domain.PlayerRepository
+import com.practicum.playlistmaker.search.domain.history.SearchHistoryInteractor
 import com.practicum.playlistmaker.search.domain.models.Track
-import com.practicum.playlistmaker.util.Creator
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class PlayerRepositoryImpl: PlayerRepository {
-
-    private var mediaPlayer = MediaPlayer()
-    private val searchHistoryInteractor = Creator.provideSearchHistoryInteractor()
+class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer,
+                           private val searchHistoryInteractor: SearchHistoryInteractor): PlayerRepository {
     private val handler = Handler(Looper.getMainLooper())
-
     override fun preparePlayer() {
         val previewUrl = loadTrackData().previewUrl
         if (previewUrl != "No previewUrl") {
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(previewUrl)
-                prepare()
+            try {
+                mediaPlayer.setDataSource(previewUrl)
+                mediaPlayer.prepare()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
             }
         }
     }
-
    override fun getTime(): String {
        return SimpleDateFormat("mm:ss", Locale.getDefault()).format(mediaPlayer.currentPosition)
     }
 
     override fun release() {
-        mediaPlayer.release()
+        if (mediaPlayer != null) {
+            mediaPlayer.release()
+        }
         handler?.removeCallbacksAndMessages(null)
     }
 
@@ -46,10 +50,16 @@ class PlayerRepositoryImpl: PlayerRepository {
             handler?.removeCallbacksAndMessages(null)
             val updateProgressTask = object : Runnable {
                 override fun run() {
-                    if (mediaPlayer?.isPlaying == true) {
-                        val progress = getTime()
-                        status.onProgress(progress)
-                        handler.postDelayed(this, 500)
+                    if (mediaPlayer != null) {
+                        try {
+                            if (mediaPlayer.isPlaying) {
+                                val progress = getTime()
+                                status.onProgress(progress)
+                                handler.postDelayed(this, 500)
+                            }
+                        } catch (e: IllegalStateException) {
+                            e.printStackTrace()
+                        }
                     }
                 }
             }

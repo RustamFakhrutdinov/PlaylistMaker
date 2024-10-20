@@ -12,14 +12,16 @@ class ExternalNavigator(private val context: Context) {
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = context.getString(R.string.type_for_all_messengers)
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareAppLink)
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(Intent.createChooser(
             shareIntent,
-            context.getString(R.string.title_share_app))
+            context.getString(R.string.title_share_app)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
     }
     fun openLink(termsLink: String) {
         val webpage: Uri = Uri.parse(termsLink)
         val userAgreementIntent = Intent(Intent.ACTION_VIEW, webpage)
+        userAgreementIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(userAgreementIntent)
     }
 
@@ -31,6 +33,7 @@ class ExternalNavigator(private val context: Context) {
         supportIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(supportEmailData.email))
         supportIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
         supportIntent.putExtra(Intent.EXTRA_TEXT, message)
+        supportIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(supportIntent)
     }
 }

@@ -10,9 +10,8 @@
     android:paddingVertical="@dimen/track_padding_vertical">
 
     <ImageView
-        android:id="@+id/trackСover"
+        android:id="@+id/trackCover"
         style="@style/TrackCover"
-
          />
     <LinearLayout
         android:layout_height="@dimen/layout_name_height"

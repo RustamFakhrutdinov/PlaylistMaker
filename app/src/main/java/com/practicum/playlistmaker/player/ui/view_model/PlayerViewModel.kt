@@ -6,11 +6,10 @@ import androidx.lifecycle.ViewModel
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
 import com.practicum.playlistmaker.player.ui.state.PlayStatus
 import com.practicum.playlistmaker.search.domain.models.Track
-import com.practicum.playlistmaker.util.Creator
 
-class PlayerViewModel(
+class PlayerViewModel(private val playerInteractor: PlayerInteractor
 ) : ViewModel() {
-    private val playerInteractor = Creator.providePlayerInteractor()
+//    private val playerInteractor = Creator.providePlayerInteractor()
     private val playStatusLiveData = MutableLiveData<PlayStatus>()
     fun getPlayStatusLiveData(): LiveData<PlayStatus> = playStatusLiveData
 
@@ -21,6 +20,11 @@ class PlayerViewModel(
 
     fun loadTrackData(): Track {
         return playerInteractor.loadTrackData()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        release()
     }
 
     fun play() {

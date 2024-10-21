@@ -17,6 +17,8 @@ import com.practicum.playlistmaker.databinding.ActivityPlayerBinding
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.player.ui.state.PlayStatus
 import com.practicum.playlistmaker.player.ui.view_model.PlayerViewModel
+import com.practicum.playlistmaker.search.ui.view_model.SearchViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PlayerActivity: AppCompatActivity() {
     private lateinit var cover: ImageView
@@ -36,14 +38,12 @@ class PlayerActivity: AppCompatActivity() {
 
     private lateinit var binding: ActivityPlayerBinding
 
-    private lateinit var viewModel: PlayerViewModel
+    private val viewModel: PlayerViewModel by viewModel()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
-
-        viewModel = ViewModelProvider(this)[PlayerViewModel::class.java]
 
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -83,13 +83,6 @@ class PlayerActivity: AppCompatActivity() {
             playButton.setImageResource(R.drawable.play)
         }
 
-    }
-
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.release()
     }
 
     private fun initializeViews() {

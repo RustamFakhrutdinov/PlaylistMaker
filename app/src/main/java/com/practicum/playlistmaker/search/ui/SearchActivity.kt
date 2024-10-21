@@ -24,7 +24,7 @@ import com.practicum.playlistmaker.player.ui.PlayerActivity
 import com.practicum.playlistmaker.search.ui.state.SearchState
 import com.practicum.playlistmaker.search.ui.track.TrackAdapter
 import com.practicum.playlistmaker.search.ui.track.TrackViewHolder
-
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.practicum.playlistmaker.search.ui.view_model.SearchViewModel
 
 class SearchActivity() : AppCompatActivity() {
@@ -53,9 +53,11 @@ class SearchActivity() : AppCompatActivity() {
     private var isClickAllowed = true
     private val handler = Handler(Looper.getMainLooper())
 
-    private lateinit var viewModel: SearchViewModel
+    //private lateinit var viewModel: SearchViewModel
 
     private lateinit var binding: ActivitySearchBinding
+
+    private val viewModel: SearchViewModel by viewModel()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +65,7 @@ class SearchActivity() : AppCompatActivity() {
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this, SearchViewModel.getViewModelFactory())[SearchViewModel::class.java]
+        //viewModel = ViewModelProvider(this, SearchViewModel.getViewModelFactory())[SearchViewModel::class.java]
 
         placeholderMessage = binding.placeholderMessage
         placeholderErrorImage = binding.errorCover

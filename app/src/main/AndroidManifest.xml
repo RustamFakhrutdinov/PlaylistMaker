@@ -24,9 +24,9 @@
         <activity
             android:name=".search.ui.SearchActivity"
             android:exported="false" />
-        <activity
-            android:name=".presentation.ui.media.MediaActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".presentation.ui.media.MediaActivity"-->
+<!--            android:exported="false" />-->
         <activity
             android:name=".main.ui.MainActivity"
             android:exported="true">

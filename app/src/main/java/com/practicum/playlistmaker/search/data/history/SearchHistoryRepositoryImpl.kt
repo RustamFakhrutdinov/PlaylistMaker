@@ -2,6 +2,7 @@ package com.practicum.playlistmaker.search.data.history
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.practicum.playlistmaker.search.domain.history.SearchHistoryRepository
@@ -11,8 +12,9 @@ const val HISTORY_TRACK_KEY = "key_for_history_track"
 const val HISTORY_TRACK_PREFERENCES = "history_track_preferences"
 
 
-class SearchHistoryRepositoryImpl(context: Context): SearchHistoryRepository {
-    private val sharedPrefs = context.getSharedPreferences(HISTORY_TRACK_PREFERENCES, Application.MODE_PRIVATE)
+class SearchHistoryRepositoryImpl(private val sharedPrefs: SharedPreferences,
+                                  private val json: Gson): SearchHistoryRepository {
+   // private val sharedPrefs = context.getSharedPreferences(HISTORY_TRACK_PREFERENCES, Application.MODE_PRIVATE)
 
 
     override fun readFromHistory(): ArrayList<Track> {
@@ -36,7 +38,8 @@ class SearchHistoryRepositoryImpl(context: Context): SearchHistoryRepository {
             arrayList.removeLast()
         }
         arrayList.add(0,track)
-        val json = Gson().toJson(arrayList)
+        //val json = Gson().toJson(arrayList)
+        val json = json.toJson(arrayList)
         sharedPrefs.edit()
             .putString(HISTORY_TRACK_KEY, json)
             .apply()

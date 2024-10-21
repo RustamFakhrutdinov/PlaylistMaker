@@ -1,25 +1,15 @@
 package com.practicum.playlistmaker.settings.ui
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.practicum.playlistmaker.util.Creator
-import com.practicum.playlistmaker.util.App
-import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
-import com.practicum.playlistmaker.search.ui.view_model.SearchViewModel
 import com.practicum.playlistmaker.settings.model.ThemeSettings
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class SettingsActivity : AppCompatActivity() {
-    private val settingsInteractor = Creator.provideSettingsInteractor()
-
-    private lateinit var viewModel: SettingsViewModel
-
     private lateinit var binding: ActivitySettingsBinding
 
     private lateinit var shareButton: Button
@@ -29,10 +19,9 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var themeSwitcher: SwitchMaterial
 
 
-
+    private val viewModel: SettingsViewModel by viewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       // setContentView(R.layout.activity_settings)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -41,8 +30,6 @@ class SettingsActivity : AppCompatActivity() {
         userAgreementButton = binding.userAgreement
         backButton = binding.arrowBack
         themeSwitcher = binding.themeSwitcher
-
-        viewModel = ViewModelProvider(this, SettingsViewModel.getViewModelFactory(this))[SettingsViewModel::class.java]
 
         backButton.setOnClickListener {
             finish()

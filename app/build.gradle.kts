@@ -56,6 +56,8 @@ dependencies {
     implementation ("androidx.constraintlayout:constraintlayout:2.0.0")
     implementation ("androidx.core:core-ktx:1.13.1")
     implementation ("io.insert-koin:koin-android:3.3.0")
+    implementation ("androidx.fragment:fragment-ktx:1.5.5")
+    implementation ("androidx.viewpager2:viewpager2:1.0.0")
 
 
 }

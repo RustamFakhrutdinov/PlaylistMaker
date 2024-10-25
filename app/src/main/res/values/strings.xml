@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Playlist Maker</string>
     <string name="title_search">Поиск</string>
-    <string name="title_media">Медиатека</string>
+    <string name="title_mediateka">Медиатека</string>
     <string name="title_settings">Настройки</string>
     <string name="title_black_theme">Темная тема</string>
     <string name="title_share_app">Поделиться приложением</string>
@@ -25,6 +25,9 @@
     <string name="year">Год</string>
     <string name="album">Альбом</string>
     <string name="duration">Длительность</string>
+    <string name="create_playlist">Новый плейлист</string>
+    <string name="playlists">Плейлисты</string>
+    <string name="favorites_tracks">Избранные треки</string>
 
 
 </resources>

@@ -29,7 +29,7 @@
             android:layout_marginTop="@dimen/padding"
             android:id="@+id/media_library"
             style="@style/MainActivityButton"
-            android:text="@string/title_media"
+            android:text="@string/title_mediateka"
             app:icon="@drawable/media_library"
             />
 

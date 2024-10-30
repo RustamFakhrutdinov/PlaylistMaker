@@ -33,9 +33,11 @@
 
         <EditText
             android:id="@+id/inputEditText"
+            android:textCursorDrawable="@drawable/custom_cursor"
             style="@style/Search"
             android:imeOptions="actionDone"
-            android:singleLine="true"/>
+            android:singleLine="true"
+            />
 
         <Button
             android:id="@+id/clearIcon"
@@ -92,6 +94,7 @@
         </LinearLayout>
         <TextView android:id="@+id/placeholderMessage"
             style="@style/PlaceholderText"
+
             />
 
         <Button

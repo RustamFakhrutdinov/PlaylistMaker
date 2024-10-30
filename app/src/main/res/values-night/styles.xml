@@ -243,4 +243,24 @@
         <item name="android:fontFamily">@font/ys_display_regular</item>
         <item name="android:textSize">13sp</item>
     </style>
+
+    <style name="CreatePlaylistButton">
+        <item name="android:layout_width">133dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="fontFamily">@font/ys_display_medium</item>
+        <item name="android:text">@string/create_playlist</item>
+        <item name="android:layout_marginTop">350dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="cornerRadius">54dp</item>
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="tabLayoutMediateka">
+        <item name="android:background">@color/another_black</item>
+        <item name="tabTextColor">@color/white</item>
+    </style>
+
 </resources>

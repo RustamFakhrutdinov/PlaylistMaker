@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 //import com.practicum.playlistmaker.presentation.ui.media.MediaActivity
 import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.mediateka.ui.MediatekaActivity
 import com.practicum.playlistmaker.search.ui.SearchActivity
 
 
@@ -24,10 +25,10 @@ class MainActivity : AppCompatActivity() {
             val searchIntent = Intent(this, SearchActivity::class.java)
             startActivity(searchIntent)
         }
-//        mediaButton.setOnClickListener {
-//            val mediaIntent = Intent(this, MediaActivity::class.java)
-//            startActivity(mediaIntent)
-//        }
+        mediaButton.setOnClickListener {
+            val mediaIntent = Intent(this, MediatekaActivity::class.java)
+            startActivity(mediaIntent)
+        }
         settingsButton.setOnClickListener {
             val settingsIntent = Intent(this, SettingsActivity::class.java)
             startActivity(settingsIntent)

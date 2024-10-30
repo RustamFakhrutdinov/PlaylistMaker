@@ -276,6 +276,7 @@
     <style name="tabLayoutMediateka">
         <item name="android:background">@color/white</item>
         <item name="tabTextColor">@color/another_black</item>
+        <item name="tabIndicatorColor">@color/another_black</item>
     </style>
 
 

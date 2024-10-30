@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.mediateka.ui
 
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
@@ -17,6 +18,7 @@ class MediatekaViewPagerAdapter (
     }
 
     override fun createFragment(position: Int): Fragment {
+        Log.d("MediatekaViewPagerAdapter", "Creating fragment for position $position")
         return when(position) {
             0 -> FavoritesFragment.newInstance(1)
             else -> PlaylistFragment.newInstance(2)

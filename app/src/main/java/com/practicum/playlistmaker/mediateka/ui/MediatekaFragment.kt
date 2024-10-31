@@ -21,21 +21,9 @@ class MediatekaFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val backButton = binding.arrowBack
-
-//        backButton.setOnClickListener {
-//            finish()
-//        }
-
-//        val trackPosition = intent.getStringExtra("poster") ?: ""
-//        val playlistNumber = intent.getIntExtra("id") ?: ""
-
         binding.viewPager.adapter = MediatekaViewPagerAdapter(
             fragmentManager = childFragmentManager,
             lifecycle = lifecycle,
-//            trackPosition = trackPosition,
-//            playlistNumber = playlistNumber,
         )
 
         tabMediator = TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->

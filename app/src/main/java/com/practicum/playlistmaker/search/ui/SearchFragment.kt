@@ -75,7 +75,6 @@ class SearchFragment: Fragment() {
         placeholderRefreshButton = binding.refresh
         progressBar = binding.progressBar
         val clearButton = binding.clearIcon
-        val backButton = binding.arrowBack
 
         historyMessage = binding.historyMessage
         cleanHistoryButton = binding.cleanHistoryButton
@@ -87,12 +86,6 @@ class SearchFragment: Fragment() {
         tracksListView.adapter = trackAdapter
 
         inputEditText.setText(editTextValue)
-
-
-//        backButton.setOnClickListener {
-//            finish()
-//        }
-
 
         searchTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -125,8 +118,6 @@ class SearchFragment: Fragment() {
             if (clickDebounce()) {
                 viewModel.saveToSearchHistory(item)
                 findNavController().navigate(R.id.action_searchFragment_to_playerActivity)
-//                val playerIntent = Intent(requireContext(), PlayerActivity::class.java)
-//                startActivity(playerIntent)
             }
 
 
@@ -198,12 +189,6 @@ class SearchFragment: Fragment() {
         super.onSaveInstanceState(outState)
         outState.putString(SEARCH_NAME, editTextValue)
     }
-
-//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-//        super.onRestoreInstanceState(savedInstanceState)
-//        editTextValue = savedInstanceState.getString(SEARCH_NAME, NAME_DEF)
-//    }
-
 
     private fun showToast(additionalMessage: String) {
         Toast.makeText(requireContext(), additionalMessage, Toast.LENGTH_LONG).show()

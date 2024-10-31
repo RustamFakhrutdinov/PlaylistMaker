@@ -9,8 +9,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 class MediatekaViewPagerAdapter (
     fragmentManager: FragmentManager,
     lifecycle: Lifecycle,
-//    private val trackPosition: Int,
-//    private val playlistNumber: Int,
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
     override fun getItemCount(): Int {

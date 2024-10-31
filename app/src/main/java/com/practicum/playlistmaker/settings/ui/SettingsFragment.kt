@@ -39,16 +39,9 @@ class SettingsFragment: Fragment() {
         shareButton = binding.share
         supportButton = binding.support
         userAgreementButton = binding.userAgreement
-        backButton = binding.arrowBack
         themeSwitcher = binding.themeSwitcher
 
-//        backButton.setOnClickListener {
-//            finish()
-//        }
-
-        viewModel.observeState().observe(viewLifecycleOwner) {
-            themeSwitcher.isChecked = it.isDarkThemeEnabled
-        }
+        themeSwitcher.isChecked = viewModel.initTheme()
 
         themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
             val themeSettings = ThemeSettings(checked)

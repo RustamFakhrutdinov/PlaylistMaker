@@ -15,11 +15,6 @@
         android:padding="4dp"
         >
 
-        <Button
-            android:id="@+id/arrowBack"
-            style="@style/ArrowBack">
-        </Button>
-
         <TextView
             style="@style/HeadWithArrowBack"
             android:text="@string/title_search"/>

@@ -13,11 +13,6 @@
         android:orientation="horizontal"
         >
 
-        <Button
-            android:id="@+id/arrowBack"
-            style="@style/ArrowBack"
-            ></Button>
-
         <TextView
             style="@style/HeadWithArrowBack"
             android:text="@string/title_settings"/>

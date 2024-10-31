@@ -1,7 +1,5 @@
 package com.practicum.playlistmaker.settings.data
 
-import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
 import com.practicum.playlistmaker.settings.domain.SettingsRepository
 import com.practicum.playlistmaker.settings.model.ThemeSettings

@@ -9,7 +9,6 @@ import com.practicum.playlistmaker.search.domain.models.Track
 
 class PlayerViewModel(private val playerInteractor: PlayerInteractor
 ) : ViewModel() {
-//    private val playerInteractor = Creator.providePlayerInteractor()
     private val playStatusLiveData = MutableLiveData<PlayStatus>()
     fun getPlayStatusLiveData(): LiveData<PlayStatus> = playStatusLiveData
 
@@ -55,7 +54,6 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor
     private fun getCurrentPlayStatus(): PlayStatus {
         return playStatusLiveData.value ?: PlayStatus(progress = "00:00", isPlaying = false)
     }
-
 
     fun release() {
         playerInteractor.release()

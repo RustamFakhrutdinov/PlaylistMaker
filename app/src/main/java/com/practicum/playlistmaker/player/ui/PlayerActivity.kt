@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -127,5 +128,11 @@ class PlayerActivity: AppCompatActivity() {
             dp,
             context.resources.displayMetrics).toInt()
 
+    }
+
+    companion object {
+        private const val ARGS_TRACK_ID = "track_id"
+        fun createArgs(trackId: String): Bundle =
+            bundleOf(ARGS_TRACK_ID to trackId)
     }
 }

@@ -14,22 +14,16 @@ const val HISTORY_TRACK_PREFERENCES = "history_track_preferences"
 
 class SearchHistoryRepositoryImpl(private val sharedPrefs: SharedPreferences,
                                   private val json: Gson): SearchHistoryRepository {
-   // private val sharedPrefs = context.getSharedPreferences(HISTORY_TRACK_PREFERENCES, Application.MODE_PRIVATE)
-
-
     override fun readFromHistory(): ArrayList<Track> {
 
         val json: String? = sharedPrefs.getString(HISTORY_TRACK_KEY, null) ?: return arrayListOf()
         val itemType = object : TypeToken<List<Track>>() {}.type
         return Gson().fromJson(json, itemType)
-
-
     }
 
     override fun clearSearchHistory() {
         sharedPrefs.edit().remove(HISTORY_TRACK_KEY).apply()
     }
-
     // запись
     override fun saveToHistory(track: Track) {
         val arrayList = readFromHistory()
@@ -38,7 +32,6 @@ class SearchHistoryRepositoryImpl(private val sharedPrefs: SharedPreferences,
             arrayList.removeLast()
         }
         arrayList.add(0,track)
-        //val json = Gson().toJson(arrayList)
         val json = json.toJson(arrayList)
         sharedPrefs.edit()
             .putString(HISTORY_TRACK_KEY, json)

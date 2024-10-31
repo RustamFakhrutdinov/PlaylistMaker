@@ -276,7 +276,24 @@
     <style name="tabLayoutMediateka">
         <item name="android:background">@color/white</item>
         <item name="tabTextColor">@color/another_black</item>
+        <item name="tabIndicatorColor">@color/another_black</item>
     </style>
+
+    <style name="bottomNavColor">
+        <item name="backgroundTint">@color/white</item>
+    </style>
+
+    <style name="BottomNavTextAppearanceActive" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">12sp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:textColor">@color/main_theme_color</item>
+    </style>
+
+    <style name="BottomNavTextAppearanceInactive" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">12sp</item>
+        <item name="android:paddingTop">10dp</item>
+    </style>
+
 
 
 

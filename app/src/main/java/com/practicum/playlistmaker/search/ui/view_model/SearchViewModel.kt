@@ -22,10 +22,7 @@ class SearchViewModel(private val tracksInteractor: TracksInteractor,
                       private val searchHistoryInteractor: SearchHistoryInteractor,
                       application: Application): AndroidViewModel(application) {
 
-//    private val tracksInteractor = Creator.provideTracksInteractor()
-//    private val searchHistoryInteractor = Creator.provideSearchHistoryInteractor()
     private val handler = Handler(Looper.getMainLooper())
-
 
     private val stateLiveData = MutableLiveData<SearchState>()
     fun observeState(): LiveData<SearchState> = stateLiveData
@@ -129,11 +126,6 @@ class SearchViewModel(private val tracksInteractor: TracksInteractor,
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private val SEARCH_REQUEST_TOKEN = Any()
-//        fun getViewModelFactory(): ViewModelProvider.Factory = viewModelFactory {
-//            initializer {
-//                SearchViewModel(this[APPLICATION_KEY] as Application)
-//            }
-//        }
     }
 
 

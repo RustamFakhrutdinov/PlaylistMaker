@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.player.domain
 import com.practicum.playlistmaker.search.domain.models.Track
 
 interface PlayerRepository {
+    fun isPlaying(): Boolean
     fun preparePlayer()
 
     fun getTime(): String
@@ -11,7 +12,7 @@ interface PlayerRepository {
 
     fun loadTrackData(): Track
 
-    fun play(status: PlayerInteractor.StatusObserver)
+    fun play()
 
     fun pause()
 }

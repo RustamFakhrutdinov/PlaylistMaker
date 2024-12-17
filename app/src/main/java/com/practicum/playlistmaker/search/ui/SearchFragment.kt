@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.R
@@ -29,6 +30,7 @@ import com.practicum.playlistmaker.search.ui.state.SearchState
 import com.practicum.playlistmaker.search.ui.track.TrackAdapter
 import com.practicum.playlistmaker.search.ui.track.TrackViewHolder
 import com.practicum.playlistmaker.search.ui.view_model.SearchViewModel
+import com.practicum.playlistmaker.util.debounce
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment: Fragment() {
@@ -61,6 +63,8 @@ class SearchFragment: Fragment() {
     private val viewModel: SearchViewModel by viewModel()
     private lateinit var binding: FragmentSearchBinding
 
+    private lateinit var clickDebounce: (Track) -> Unit
+    private lateinit var clickDebounceHistory: (Track) -> Unit
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
@@ -113,23 +117,23 @@ class SearchFragment: Fragment() {
             viewModel.clearSearchHistory()
         }
 
+        clickDebounce = debounce<Track>(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { item ->
+            viewModel.saveToSearchHistory(item)
+            findNavController().navigate(R.id.action_searchFragment_to_playerActivity)
+        }
+
+        clickDebounceHistory = debounce<Track>(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { item ->
+            viewModel.saveToSearchHistory(item)
+            viewModel.showSearchHistory()
+            findNavController().navigate(R.id.action_searchFragment_to_playerActivity)
+        }
 
         trackAdapter.onTrackClickListener = TrackViewHolder.OnTrackClickListener { item->
-            if (clickDebounce()) {
-                viewModel.saveToSearchHistory(item)
-                findNavController().navigate(R.id.action_searchFragment_to_playerActivity)
-            }
-
-
+            clickDebounce(item)
         }
 
         historyTrackAdapter.onTrackClickListener = TrackViewHolder.OnTrackClickListener { item->
-            if (clickDebounce()) {
-                viewModel.saveToSearchHistory(item)
-                viewModel.showSearchHistory()
-                val playerIntent = Intent(requireContext(), PlayerActivity::class.java)
-                startActivity(playerIntent)
-            }
+            clickDebounceHistory(item)
         }
 
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
@@ -171,15 +175,22 @@ class SearchFragment: Fragment() {
         super.onDestroyView()
         searchTextWatcher?.let { inputEditText.removeTextChangedListener(it) }
     }
-
-    private fun clickDebounce() : Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
-        }
-        return current
-    }
+//    private fun clickDebounce() : Boolean {
+//        val current = isClickAllowed
+//        if (isClickAllowed) {
+//            isClickAllowed = false
+//            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+//        }
+//        return current
+//    }
+//    private fun clickDebounce() : Boolean {
+//        val current = isClickAllowed
+//        if (isClickAllowed) {
+//            isClickAllowed = false
+//            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+//        }
+//        return current
+//    }
 
     private fun clearButtonVisibility(s: CharSequence?): Boolean {
         return !s.isNullOrEmpty()

@@ -3,9 +3,13 @@ package com.practicum.playlistmaker.player.ui.view_model
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
 import com.practicum.playlistmaker.player.ui.state.PlayStatus
 import com.practicum.playlistmaker.search.domain.models.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class PlayerViewModel(private val playerInteractor: PlayerInteractor
 ) : ViewModel() {
@@ -16,7 +20,7 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor
     init {
         preparePlayer()
     }
-
+    private var timerJob: Job? = null
     fun loadTrackData(): Track {
         return playerInteractor.loadTrackData()
     }
@@ -27,27 +31,24 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor
     }
 
     fun play() {
-
-        playerInteractor.play(
-            status = object : PlayerInteractor.StatusObserver {
-                override fun onProgress(progress: String) {
-                    playStatusLiveData.value = getCurrentPlayStatus().copy(progress = progress)
-                }
-
-                override fun onStop() {
-                    playStatusLiveData.value = getCurrentPlayStatus().copy(isPlaying = false)
-                }
-
-                override fun onPlay() {
-                    playStatusLiveData.value = getCurrentPlayStatus().copy(isPlaying = true)
-                }
-
-            }
-        )
+        playerInteractor.play()
+        playStatusLiveData.value = getCurrentPlayStatus().copy(isPlaying = true)
+        startTimer()
     }
+    private fun startTimer() {
+        timerJob = viewModelScope.launch {
+            while (playerInteractor.isPlaying()) {
+                delay(300L)
+                playStatusLiveData.postValue(getCurrentPlayStatus().copy(progress = playerInteractor.getTime()))
+            }
+            playStatusLiveData.postValue(getCurrentPlayStatus().copy(progress = "00:00", isPlaying = false))
+        }
+    }
+
 
     fun pause() {
         playerInteractor.pause()
+        timerJob?.cancel()
         playStatusLiveData.postValue(getCurrentPlayStatus().copy(isPlaying = false))
     }
 
@@ -55,7 +56,7 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor
         return playStatusLiveData.value ?: PlayStatus(progress = "00:00", isPlaying = false)
     }
 
-    fun release() {
+    private fun release() {
         playerInteractor.release()
     }
 

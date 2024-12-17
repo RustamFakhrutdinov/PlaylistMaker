@@ -6,6 +6,9 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
@@ -13,21 +16,23 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.ActivitySearchBinding
-import com.practicum.playlistmaker.search.domain.models.Track
+import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.player.ui.PlayerActivity
+import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.state.SearchState
 import com.practicum.playlistmaker.search.ui.track.TrackAdapter
 import com.practicum.playlistmaker.search.ui.track.TrackViewHolder
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.practicum.playlistmaker.search.ui.view_model.SearchViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SearchActivity() : AppCompatActivity() {
+class SearchFragment: Fragment() {
+
     private var editTextValue: String = NAME_DEF
 
     private lateinit var rvHistoryTrack: RecyclerView
@@ -53,19 +58,16 @@ class SearchActivity() : AppCompatActivity() {
     private var isClickAllowed = true
     private val handler = Handler(Looper.getMainLooper())
 
-    //private lateinit var viewModel: SearchViewModel
-
-    private lateinit var binding: ActivitySearchBinding
-
     private val viewModel: SearchViewModel by viewModel()
+    private lateinit var binding: FragmentSearchBinding
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        binding = FragmentSearchBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivitySearchBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        //viewModel = ViewModelProvider(this, SearchViewModel.getViewModelFactory())[SearchViewModel::class.java]
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         placeholderMessage = binding.placeholderMessage
         placeholderErrorImage = binding.errorCover
@@ -73,7 +75,6 @@ class SearchActivity() : AppCompatActivity() {
         placeholderRefreshButton = binding.refresh
         progressBar = binding.progressBar
         val clearButton = binding.clearIcon
-        val backButton = binding.arrowBack
 
         historyMessage = binding.historyMessage
         cleanHistoryButton = binding.cleanHistoryButton
@@ -85,12 +86,6 @@ class SearchActivity() : AppCompatActivity() {
         tracksListView.adapter = trackAdapter
 
         inputEditText.setText(editTextValue)
-
-
-        backButton.setOnClickListener {
-            finish()
-        }
-
 
         searchTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -122,8 +117,7 @@ class SearchActivity() : AppCompatActivity() {
         trackAdapter.onTrackClickListener = TrackViewHolder.OnTrackClickListener { item->
             if (clickDebounce()) {
                 viewModel.saveToSearchHistory(item)
-                val playerIntent = Intent(this, PlayerActivity::class.java)
-                startActivity(playerIntent)
+                findNavController().navigate(R.id.action_searchFragment_to_playerActivity)
             }
 
 
@@ -133,7 +127,7 @@ class SearchActivity() : AppCompatActivity() {
             if (clickDebounce()) {
                 viewModel.saveToSearchHistory(item)
                 viewModel.showSearchHistory()
-                val playerIntent = Intent(this, PlayerActivity::class.java)
+                val playerIntent = Intent(requireContext(), PlayerActivity::class.java)
                 startActivity(playerIntent)
             }
         }
@@ -161,22 +155,20 @@ class SearchActivity() : AppCompatActivity() {
         }
 
 
-        viewModel.observeState().observe(this) {
+        viewModel.observeState().observe(viewLifecycleOwner) {
             render(it)
         }
 
-        viewModel.observeShowToast().observe(this) {
+        viewModel.observeShowToast().observe(viewLifecycleOwner) {
             showToast(it)
         }
-        viewModel.observeHistory().observe(this) {
+        viewModel.observeHistory().observe(viewLifecycleOwner) {
             showSearchHistory(it)
         }
     }
 
-
-
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         searchTextWatcher?.let { inputEditText.removeTextChangedListener(it) }
     }
 
@@ -198,13 +190,8 @@ class SearchActivity() : AppCompatActivity() {
         outState.putString(SEARCH_NAME, editTextValue)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        editTextValue = savedInstanceState.getString(SEARCH_NAME, NAME_DEF)
-    }
-
     private fun showToast(additionalMessage: String) {
-        Toast.makeText(this, additionalMessage, Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), additionalMessage, Toast.LENGTH_LONG).show()
     }
 
     private fun render(state: SearchState) {
@@ -280,6 +267,15 @@ class SearchActivity() : AppCompatActivity() {
         const val SEARCH_NAME = "TEXT_WATCHER_NAME"
         const val NAME_DEF = ""
         private const val CLICK_DEBOUNCE_DELAY = 1000L
+
+        const val TAG = "SearchFragment"
+
+        fun createArgs(): Bundle =
+            bundleOf()
     }
+
+
+
+
 
 }

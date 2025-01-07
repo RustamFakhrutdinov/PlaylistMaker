@@ -85,6 +85,7 @@
                 android:id="@+id/cleanHistoryButton"
                 style="@style/CleanHistoryButton"
                 android:padding="0dp"
+                android:layout_marginBottom="24dp"
                 android:visibility="gone"
                 />
         </LinearLayout>

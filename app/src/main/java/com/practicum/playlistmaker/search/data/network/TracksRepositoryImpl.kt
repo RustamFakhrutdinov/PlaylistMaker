@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker.search.data.network
 
 import com.practicum.playlistmaker.mediateka.data.db.AppDatabase
+import com.practicum.playlistmaker.mediateka.data.db.dao.TrackFavouriteDao
 import com.practicum.playlistmaker.search.data.NetworkClient
 import com.practicum.playlistmaker.search.data.dto.TracksResponse
 import com.practicum.playlistmaker.search.data.dto.TracksSearchRequest
@@ -14,7 +15,7 @@ import java.util.Locale
 
 class TracksRepositoryImpl(
     private val networkClient: NetworkClient,
-    private val appDatabase: AppDatabase
+    private val trackFavouriteDao: TrackFavouriteDao
 ) : TracksRepository {
     override fun search(expression: String): Flow<Resource<List<Track>>> = flow {
         val response = networkClient.doRequest(TracksSearchRequest(expression))
@@ -23,7 +24,7 @@ class TracksRepositoryImpl(
                 emit(Resource.Error("Проверьте подключение к интернету"))
             }
             200 -> {
-                val favouriteTracks = appDatabase.trackFavouriteDao().getFavouriteTracksId()
+                val favouriteTracks = trackFavouriteDao.getFavouriteTracksId()
                 emit(Resource.Success((response as TracksResponse).results.map {
                     Track(
                         it.trackId?:-1,

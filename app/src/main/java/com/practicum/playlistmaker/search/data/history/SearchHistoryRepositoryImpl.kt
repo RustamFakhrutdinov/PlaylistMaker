@@ -1,11 +1,10 @@
 package com.practicum.playlistmaker.search.data.history
 
-import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.practicum.playlistmaker.mediateka.data.db.AppDatabase
+import com.practicum.playlistmaker.mediateka.data.db.dao.TrackFavouriteDao
 import com.practicum.playlistmaker.search.domain.history.SearchHistoryRepository
 import com.practicum.playlistmaker.search.domain.models.Track
 
@@ -15,7 +14,7 @@ const val HISTORY_TRACK_PREFERENCES = "history_track_preferences"
 
 class SearchHistoryRepositoryImpl(private val sharedPrefs: SharedPreferences,
                                   private val json: Gson,
-                                  private val appDatabase: AppDatabase
+                                  private val trackFavouriteDao: TrackFavouriteDao
 ): SearchHistoryRepository {
     override fun readFromHistory(): ArrayList<Track> {
 
@@ -44,7 +43,7 @@ class SearchHistoryRepositoryImpl(private val sharedPrefs: SharedPreferences,
     }
 
     private suspend fun isFavourite(track:Track): Boolean {
-        val favouriteTracks = appDatabase.trackFavouriteDao().getFavouriteTracksId()
+        val favouriteTracks = trackFavouriteDao.getFavouriteTracksId()
         return track.trackId in favouriteTracks
     }
 

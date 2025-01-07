@@ -105,6 +105,8 @@ class SearchFragment: Fragment() {
                 )
                 if (inputEditText.hasFocus() && inputEditText.text.isEmpty()) {
                     viewModel.showSearchHistory()
+                } else {
+                    hideHistory()
                 }
             }
 
@@ -261,6 +263,15 @@ class SearchFragment: Fragment() {
             cleanHistoryButton.isVisible = false
             historyMessage.isVisible = false
         }
+    }
+
+    private fun hideHistory() {
+        rvHistoryTrack.isVisible = false
+        tracksListView.isVisible = false
+        placeholderMessage.isVisible = false
+        placeholderErrorImage.isVisible = false
+        cleanHistoryButton.isVisible = false
+        historyMessage.isVisible = false
     }
 
     companion object {

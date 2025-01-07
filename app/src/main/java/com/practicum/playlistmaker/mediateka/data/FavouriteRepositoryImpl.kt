@@ -2,6 +2,7 @@ package com.practicum.playlistmaker.mediateka.data
 
 import com.practicum.playlistmaker.mediateka.data.converters.TrackFavouriteDbConverter
 import com.practicum.playlistmaker.mediateka.data.db.AppDatabase
+import com.practicum.playlistmaker.mediateka.data.db.dao.TrackFavouriteDao
 import com.practicum.playlistmaker.mediateka.data.db.entity.TrackFavouriteEntity
 import com.practicum.playlistmaker.mediateka.domain.db.FavouriteRepository
 import com.practicum.playlistmaker.search.data.dto.TrackDto
@@ -10,12 +11,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.Locale
 
 class FavouriteRepositoryImpl(
-    private val appDatabase: AppDatabase,
+    private val trackFavouriteDao: TrackFavouriteDao,
     private val trackFavouriteDbConvertor: TrackFavouriteDbConverter,
 ): FavouriteRepository {
+
+    private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
     override suspend fun addTrackToFavourite(track: Track) {
         val trackDto = TrackDto(
             track.trackId,
@@ -29,7 +33,8 @@ class FavouriteRepositoryImpl(
             track.country,
             track.previewUrl
         )
-        appDatabase.trackFavouriteDao().insertFavouriteTrack(trackFavouriteDbConvertor.map(trackDto))
+
+        trackFavouriteDao.insertFavouriteTrack(trackFavouriteDbConvertor.map(trackDto, Instant.now().epochSecond))
     }
 
     override suspend fun deleteTrackFromFavourite(track: Track) {
@@ -45,22 +50,18 @@ class FavouriteRepositoryImpl(
             track.country,
             track.previewUrl
         )
-        appDatabase.trackFavouriteDao().deleteFavouriteTrack(trackFavouriteDbConvertor.map(trackDto))
+        trackFavouriteDao.deleteFavouriteTrack(trackFavouriteDbConvertor.map(trackDto,Instant.now().epochSecond))
     }
 
-//    override suspend fun getFavouriteTracks(): Flow<List<Track>> = flow {
-//        val tracks = appDatabase.trackFavouriteDao().getFavouriteTracks()
-//        emit(convertFromTracksEntity(tracks))
-//    }
-
     override suspend fun getFavouriteTracks(): Flow<List<Track>> {
-        return appDatabase.trackFavouriteDao()
-            .getFavouriteTracks()
-            .map { tracks -> convertFromTracksEntity(tracks) }
+
+        return trackFavouriteDao.getFavouriteTracks().map { tracks ->
+            convertFromTracksEntity(tracks)
+        }
     }
 
     override suspend fun isFavourite(trackId: Int): Boolean {
-        val tracksIds = appDatabase.trackFavouriteDao().getFavouriteTracksId()
+        val tracksIds = trackFavouriteDao.getFavouriteTracksId()
         return trackId in tracksIds
     }
 
@@ -69,8 +70,7 @@ class FavouriteRepositoryImpl(
     }
 
     private fun parseTimeToMillis(time: String): Long {
-        val sdf = SimpleDateFormat("mm:ss", Locale.getDefault())
-        val date = sdf.parse(time) ?: return 0L // Парсим строку в дату
+        val date = dateFormat.parse(time) ?: return 0L // Парсим строку в дату
         return date.time // Извлекаем миллисекунды
     }
 

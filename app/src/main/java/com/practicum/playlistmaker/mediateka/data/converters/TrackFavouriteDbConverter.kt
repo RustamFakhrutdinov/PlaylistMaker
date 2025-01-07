@@ -8,7 +8,7 @@ import java.time.Instant
 import java.util.Locale
 
 class TrackFavouriteDbConverter {
-    fun map(track: TrackDto): TrackFavouriteEntity {
+    fun map(track: TrackDto, addedTimestamp: Long?): TrackFavouriteEntity {
         return TrackFavouriteEntity(track.trackId!!,
             track.trackName?: "",
             track.artistName?: "",
@@ -19,7 +19,7 @@ class TrackFavouriteDbConverter {
             track.primaryGenreName?: "",
             track.country?: "",
             track.previewUrl?: "",
-            Instant.now().epochSecond
+            addedTimestamp?:0L
         )
     }
 

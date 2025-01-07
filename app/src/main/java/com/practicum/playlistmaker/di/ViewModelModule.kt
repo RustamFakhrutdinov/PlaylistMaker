@@ -5,6 +5,7 @@ import com.practicum.playlistmaker.mediateka.ui.viewmodel.PlayListViewModel
 import com.practicum.playlistmaker.player.ui.view_model.PlayerViewModel
 import com.practicum.playlistmaker.search.ui.view_model.SearchViewModel
 import com.practicum.playlistmaker.settings.ui.SettingsViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -15,15 +16,15 @@ val viewModelModule = module {
     }
 
     viewModel {
-        PlayerViewModel(get())
+        PlayerViewModel(get(), get())
     }
 
     viewModel {
         SettingsViewModel(get(), get())
     }
 
-    viewModel {(position: Int) ->
-        FavoritesViewModel(position)
+    viewModel {
+        FavoritesViewModel(get(),androidContext())
     }
 
     viewModel {(playlistNumber: Int) ->

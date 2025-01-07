@@ -20,10 +20,12 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentSearchBinding
+import com.practicum.playlistmaker.mediateka.ui.MediatekaFragmentDirections
 import com.practicum.playlistmaker.player.ui.PlayerActivity
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.state.SearchState
@@ -119,13 +121,15 @@ class SearchFragment: Fragment() {
 
         clickDebounce = debounce<Track>(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { item ->
             viewModel.saveToSearchHistory(item)
-            findNavController().navigate(R.id.action_searchFragment_to_playerActivity)
+            val direction: NavDirections = SearchFragmentDirections.actionSearchFragmentToPlayerActivity(item)
+            findNavController().navigate(direction)
         }
 
         clickDebounceHistory = debounce<Track>(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { item ->
             viewModel.saveToSearchHistory(item)
             viewModel.showSearchHistory()
-            findNavController().navigate(R.id.action_searchFragment_to_playerActivity)
+            val direction: NavDirections = SearchFragmentDirections.actionSearchFragmentToPlayerActivity(item)
+            findNavController().navigate(direction)
         }
 
         trackAdapter.onTrackClickListener = TrackViewHolder.OnTrackClickListener { item->
@@ -175,22 +179,6 @@ class SearchFragment: Fragment() {
         super.onDestroyView()
         searchTextWatcher?.let { inputEditText.removeTextChangedListener(it) }
     }
-//    private fun clickDebounce() : Boolean {
-//        val current = isClickAllowed
-//        if (isClickAllowed) {
-//            isClickAllowed = false
-//            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
-//        }
-//        return current
-//    }
-//    private fun clickDebounce() : Boolean {
-//        val current = isClickAllowed
-//        if (isClickAllowed) {
-//            isClickAllowed = false
-//            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
-//        }
-//        return current
-//    }
 
     private fun clearButtonVisibility(s: CharSequence?): Boolean {
         return !s.isNullOrEmpty()
@@ -255,15 +243,16 @@ class SearchFragment: Fragment() {
     private fun showSearchHistory(history: List<Track>) {
         if (history.isNotEmpty()) {
             rvHistoryTrack.isVisible = true
-            historyTracksList.clear()
-            historyTracksList.addAll(history)
-            historyTrackAdapter.notifyDataSetChanged()
             tracksListView.isVisible = false
             progressBar.isVisible = false
             cleanHistoryButton.isVisible = true
             historyMessage.isVisible = true
             placeholderMessage.isVisible = false
             placeholderErrorImage.isVisible = false
+            historyTracksList.clear()
+            historyTracksList.addAll(history)
+            historyTrackAdapter.notifyDataSetChanged()
+
         } else {
             rvHistoryTrack.isVisible = false
             tracksListView.isVisible = false

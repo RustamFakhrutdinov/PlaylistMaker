@@ -19,6 +19,7 @@ import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.state.SearchState
 import com.practicum.playlistmaker.util.SingleLiveEvent
 import com.practicum.playlistmaker.util.debounce
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SearchViewModel(private val tracksInteractor: TracksInteractor,
@@ -50,7 +51,9 @@ class SearchViewModel(private val tracksInteractor: TracksInteractor,
         searchHistoryLiveData.postValue(searchHistoryInteractor.readFromHistory())
     }
     fun saveToSearchHistory(item:Track) {
-        searchHistoryInteractor.saveToHistory(item)
+        viewModelScope.launch(Dispatchers.IO) {
+            searchHistoryInteractor.saveToHistory(item)
+        }
     }
 
     private val trackSearchDebounce = debounce<String>(SEARCH_DEBOUNCE_DELAY, viewModelScope, true) { changedText ->

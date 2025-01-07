@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.practicum.playlistmaker.mediateka.data.db.AppDatabase
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
 import com.practicum.playlistmaker.player.domain.PlayerRepository
 import com.practicum.playlistmaker.search.domain.history.SearchHistoryInteractor
@@ -15,7 +16,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer,
-                           private val searchHistoryInteractor: SearchHistoryInteractor): PlayerRepository {
+                           private val searchHistoryInteractor: SearchHistoryInteractor
+): PlayerRepository {
     override fun isPlaying(): Boolean {
         return mediaPlayer.isPlaying
     }
@@ -47,12 +49,13 @@ class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer,
         return searchHistoryInteractor.readFromHistory()[0]
     }
 
-override fun play() {
-    mediaPlayer.apply {
-        start()
+    override fun play() {
+        mediaPlayer.apply {
+            start()
+        }
     }
-}
     override fun pause() {
         mediaPlayer.pause()
     }
+
 }

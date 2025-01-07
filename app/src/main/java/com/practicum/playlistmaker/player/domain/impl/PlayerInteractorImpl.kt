@@ -5,6 +5,10 @@ import com.practicum.playlistmaker.player.domain.PlayerRepository
 import com.practicum.playlistmaker.search.domain.models.Track
 
 class PlayerInteractorImpl(private val repository: PlayerRepository): PlayerInteractor {
+    override fun isPlaying(): Boolean {
+        return repository.isPlaying()
+    }
+
     override fun preparePlayer() {
         repository.preparePlayer()
     }
@@ -15,8 +19,8 @@ class PlayerInteractorImpl(private val repository: PlayerRepository): PlayerInte
     override fun loadTrackData(): Track {
        return repository.loadTrackData()
     }
-    override fun play(status: PlayerInteractor.StatusObserver) {
-        repository.play(status)
+    override fun play() {
+        repository.play()
     }
     override fun pause() {
         repository.pause()
@@ -24,4 +28,6 @@ class PlayerInteractorImpl(private val repository: PlayerRepository): PlayerInte
     override fun release() {
         repository.release()
     }
+
+
 }

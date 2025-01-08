@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.navArgs
+import androidx.navigation.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
@@ -32,6 +34,7 @@ class PlayerActivity: AppCompatActivity() {
     private lateinit var trackCountry: TextView
     private lateinit var trackTime: TextView
     private lateinit var playButton: ImageButton
+    private lateinit var favouriteButton: ImageButton
 
     private lateinit var albumGroup: Group
 
@@ -51,14 +54,25 @@ class PlayerActivity: AppCompatActivity() {
 
         val backButton = binding.backButtonPlayer
 
-        track = viewModel.loadTrackData()
+        val args: PlayerActivityArgs by navArgs()
+        track = args.track
+        viewModel.isFavourite(track)
+
+        //track = viewModel.loadTrackData()
         initializeViews()
         addInformation()
 
         viewModel.getPlayStatusLiveData().observe(this) { playStatus ->
             playButtonChange(playStatus)
             trackTime.text = playStatus.progress
+
+            if(playStatus.isFavourite) {
+                favouriteButton.setImageResource(R.drawable.favourites_active)
+            } else {
+                favouriteButton.setImageResource(R.drawable.favorites)
+            }
         }
+
         playButton.setOnClickListener {
             val currentPlayStatus = viewModel.getPlayStatusLiveData().value
             if (currentPlayStatus?.isPlaying == true) {
@@ -72,8 +86,18 @@ class PlayerActivity: AppCompatActivity() {
             finish()
         }
 
+        favouriteButton.setOnClickListener {
+            //val currentPlayStatus = viewModel.getPlayStatusLiveData().value
+            viewModel.onFavoriteClicked(track)
+        }
 
 
+
+
+
+
+    }
+    private fun favouriteButton(track: Track) {
 
     }
 
@@ -98,6 +122,7 @@ class PlayerActivity: AppCompatActivity() {
         playButton = binding.playButton
         trackTime = binding.trackTime
         albumGroup = binding.albumGroup
+        favouriteButton = binding.favoritesButton
     }
 
     private fun addInformation() {
@@ -131,8 +156,8 @@ class PlayerActivity: AppCompatActivity() {
     }
 
     companion object {
-        private const val ARGS_TRACK_ID = "track_id"
-        fun createArgs(trackId: String): Bundle =
-            bundleOf(ARGS_TRACK_ID to trackId)
+        private const val ARGS_TRACK = "track"
+        fun createArgs(track: Track): Bundle =
+            bundleOf(ARGS_TRACK to track)
     }
 }

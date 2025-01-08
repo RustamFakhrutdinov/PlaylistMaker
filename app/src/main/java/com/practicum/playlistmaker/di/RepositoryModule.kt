@@ -1,5 +1,8 @@
 package com.practicum.playlistmaker.di
 
+import com.practicum.playlistmaker.mediateka.data.FavouriteRepositoryImpl
+import com.practicum.playlistmaker.mediateka.data.converters.TrackFavouriteDbConverter
+import com.practicum.playlistmaker.mediateka.domain.db.FavouriteRepository
 import com.practicum.playlistmaker.player.data.PlayerRepositoryImpl
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
 import com.practicum.playlistmaker.player.domain.PlayerRepository
@@ -16,11 +19,11 @@ import org.koin.dsl.module
 val repositoryModule = module {
 
     single<TracksRepository> {
-        TracksRepositoryImpl(get())
+        TracksRepositoryImpl(get(), get())
     }
 
     single<SearchHistoryRepository> {
-        SearchHistoryRepositoryImpl(sharedPrefs = get(named("historyPrefs")), get())
+        SearchHistoryRepositoryImpl(sharedPrefs = get(named("historyPrefs")), get(),get())
     }
 
     factory<PlayerRepository> {
@@ -29,6 +32,12 @@ val repositoryModule = module {
 
     single<SettingsRepository> {
         SettingsRepositoryImpl(sharedPrefs = get(named("themePrefs")))
+    }
+
+    factory { TrackFavouriteDbConverter() }
+
+    single<FavouriteRepository> {
+        FavouriteRepositoryImpl(get(),get())
     }
 
 

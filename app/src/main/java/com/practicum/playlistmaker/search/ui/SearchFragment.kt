@@ -58,10 +58,6 @@ class SearchFragment: Fragment() {
     private var historyTracksList = arrayListOf<Track>()
     private val historyTrackAdapter = TrackAdapter(historyTracksList)
 
-
-    private var isClickAllowed = true
-    private val handler = Handler(Looper.getMainLooper())
-
     private val viewModel: SearchViewModel by viewModel()
     private lateinit var binding: FragmentSearchBinding
 

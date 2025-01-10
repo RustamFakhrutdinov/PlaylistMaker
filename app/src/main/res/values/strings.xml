@@ -29,6 +29,16 @@
     <string name="playlists">Плейлисты</string>
     <string name="favorites_tracks">Избранные треки</string>
     <string name="favorites_tracks_empty">Ваша медиатека пуста</string>
+    <string name="new_playlist_header">Новый плейлист</string>
+    <string name="playlist_name">Название*</string>
+    <string name="playlist_disc">Описание</string>
+    <string name="catalog">playlistmaker</string>
+    <string name="dialog_title">Завершить создание плейлиста?</string>
+    <string name="dialog_message">Все несохраненные данные будут потеряны</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="dialog_complete">Завершить</string>
+    <string name="no_playlists">Вы не создали \nни одного плейлиста</string>
+
 
 
 </resources>

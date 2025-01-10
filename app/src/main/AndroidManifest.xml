@@ -29,7 +29,7 @@
         <activity
             android:name=".mediateka.ui.root.RootActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustNothing">>
+            android:windowSoftInputMode="adjustPan">>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

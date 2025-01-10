@@ -1,10 +1,10 @@
-package com.practicum.playlistmaker.mediateka.domain
+package com.practicum.playlistmaker.mediateka.domain.impl
 
 import com.practicum.playlistmaker.mediateka.domain.db.FavouriteInteractor
 import com.practicum.playlistmaker.mediateka.domain.db.FavouriteRepository
 import com.practicum.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+
 
 class FavouriteInteractorImpl(
     private val favouriteRepository: FavouriteRepository

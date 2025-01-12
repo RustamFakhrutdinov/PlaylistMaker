@@ -71,7 +71,6 @@ class PlayerFragment : Fragment() {
     private var playlistList = mutableListOf<Playlist>()
     private val playlistAdapter = BottomSheeetPlaylistAdapter(playlistList)
 
-    private lateinit var clickDebounce: (Playlist) -> Unit
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -99,11 +98,12 @@ class PlayerFragment : Fragment() {
             state = BottomSheetBehavior.STATE_HIDDEN
         }
 
-        binding.playlistButton.setOnClickListener{
+        binding.playlistButton.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        bottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
 
             override fun onStateChanged(bottomSheet: View, newState: Int) {
 
@@ -111,6 +111,7 @@ class PlayerFragment : Fragment() {
                     BottomSheetBehavior.STATE_HIDDEN -> {
                         overlay.visibility = View.GONE
                     }
+
                     else -> {
                         overlay.visibility = View.VISIBLE
                     }
@@ -118,7 +119,7 @@ class PlayerFragment : Fragment() {
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                overlay.alpha = (slideOffset + 1)/2
+                overlay.alpha = (slideOffset + 1) / 2
             }
         })
         initializeViews()
@@ -142,7 +143,7 @@ class PlayerFragment : Fragment() {
             }
         }
 
-        viewModel.getTrackInPlaylistLiveData().observe(viewLifecycleOwner) {state ->
+        viewModel.getTrackInPlaylistLiveData().observe(viewLifecycleOwner) { state ->
             renderTrackInPlaylists(state)
         }
 
@@ -163,26 +164,24 @@ class PlayerFragment : Fragment() {
             viewModel.onFavoriteClicked(track)
         }
 
-        clickDebounce = debounce(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { item ->
-            viewModel.onPlaylistClicked(track, item)
-        }
-
-        playlistAdapter.onPlaylistClickListener = BottomSheetPlaylistViewHolder.OnPlaylistClickListener { item ->
-            clickDebounce(item)
-        }
+        playlistAdapter.onPlaylistClickListener =
+            BottomSheetPlaylistViewHolder.OnPlaylistClickListener { item ->
+                viewModel.onPlaylistClicked(track, item)
+            }
 
     }
 
-    private fun render(state:PlaylistState) {
+    private fun render(state: PlaylistState) {
         when (state) {
             is PlaylistState.Empty -> showEmpty(state.message)
-            is PlaylistState.Content ->showContent(state.playlists)
+            is PlaylistState.Content -> showContent(state.playlists)
         }
     }
-    private fun renderTrackInPlaylists(state:TrackInPlaylistState) {
+
+    private fun renderTrackInPlaylists(state: TrackInPlaylistState) {
         when (state) {
             is TrackInPlaylistState.Added -> showPlaylistAdded(state.playlistName)
-            is TrackInPlaylistState.NotAdded ->showPlaylistNotAdded(state.playlistName)
+            is TrackInPlaylistState.NotAdded -> showPlaylistNotAdded(state.playlistName)
         }
     }
 
@@ -197,7 +196,6 @@ class PlayerFragment : Fragment() {
     private fun showPlaylistNotAdded(name: String) {
         Toast.makeText(context, "Трек уже добавлен в плейлист $name", Toast.LENGTH_LONG).show()
     }
-
 
 
     private fun showContent(playlists: List<Playlist>) {

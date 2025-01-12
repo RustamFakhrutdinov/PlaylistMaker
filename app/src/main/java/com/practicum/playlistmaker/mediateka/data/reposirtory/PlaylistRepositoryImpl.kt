@@ -24,7 +24,7 @@ class PlaylistRepositoryImpl(
     private val json: Gson,
     private val trackInPlaylistsDao: TrackInPlaylistsDao,
     private val trackInPlaylistsDbConverter: TrackInPlaylistsDbConverter
-) :PlaylistRepository {
+) : PlaylistRepository {
     private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
     override suspend fun addPlaylist(playlist: Playlist) {
         val playlistDto = PlaylistDto(
@@ -51,14 +51,14 @@ class PlaylistRepositoryImpl(
     }
 
     override suspend fun getPlaylists(): Flow<List<Playlist>> {
-        return playlistDao.getPlaylists().map {playlists ->
+        return playlistDao.getPlaylists().map { playlists ->
             convertFromPlaylistEntity(playlists)
         }
     }
 
 
     override suspend fun addTrackIdToPlaylist(track: Track, playlistId: Int) {
-        playlistDao.addTrackIdToPlaylist(convertToString(track,playlistId), playlistId)
+        playlistDao.addTrackIdToPlaylist(convertToString(track, playlistId), playlistId)
         playlistDao.countPlus(playlistId)
         val trackDto = TrackDto(
             track.trackId,
@@ -82,16 +82,17 @@ class PlaylistRepositoryImpl(
     }
 
 
-   private fun readTrackListFromBD(playlistId: Int): ArrayList<Int> {
+    private fun readTrackListFromBD(playlistId: Int): ArrayList<Int> {
 
         val json: String? = playlistDao.getTrackIdList(playlistId)
-       if (json.isNullOrEmpty()) {
-           return arrayListOf()
-       }
+        if (json.isNullOrEmpty()) {
+            return arrayListOf()
+        }
         val itemType = object : TypeToken<List<Int>>() {}.type
 
         return Gson().fromJson(json, itemType)
     }
+
     private fun convertToString(track: Track, playlistId: Int): String {
 
         var trackList = readTrackListFromBD(playlistId)

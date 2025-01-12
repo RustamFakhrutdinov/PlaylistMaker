@@ -85,7 +85,7 @@
             android:layout_marginTop="54dp"
             android:layout_marginBottom="29dp"
             android:background="@drawable/round_button"
-            android:backgroundTint="@color/icon_grey"
+
             android:src="@drawable/playlist_add"
             app:layout_constraintStart_toEndOf="@id/leftBorderForTrackName"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -115,7 +115,7 @@
             android:layout_marginTop="54dp"
             android:layout_marginBottom="29dp"
             android:background="@drawable/round_button"
-            android:backgroundTint="@color/icon_grey"
+
             android:src="@drawable/favorites"
             app:layout_constraintEnd_toEndOf="@id/rightBorderForTrackName"
             app:layout_constraintStart_toEndOf="@id/playButton"
@@ -327,6 +327,7 @@
         android:layout_height="match_parent"
         style="@style/BottomSheetPlaylistsLinearLayout"
         android:orientation="vertical"
+        tools:visibility="gone"
         app:behavior_hideable="true"
         app:behavior_peekHeight="505dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">

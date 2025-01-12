@@ -317,6 +317,17 @@
         <item name="android:textColor">@color/another_black</item>
     </style>
 
+    <style name="CustomAlertDialogButtonStyle" >
+        <item name="android:textColor">@color/main_theme_color</item>
+        <item name="android:textSize">@color/main_theme_color</item>
+    </style>
+
+    <style name="CustomTextInputStyle" >
+        <item name="colorControlActivated">@color/main_theme_color</item>
+    </style>
+
+
+
 
 
 

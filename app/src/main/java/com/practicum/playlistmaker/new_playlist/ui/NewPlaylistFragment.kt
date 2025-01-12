@@ -3,10 +3,12 @@ package com.practicum.playlistmaker.new_playlist.ui
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -24,6 +26,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -33,6 +36,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.markodevcic.peko.PermissionRequester
+import com.markodevcic.peko.PermissionResult
+
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentFavoritesBinding
 import com.practicum.playlistmaker.databinding.FragmentNewPlaylistBinding
@@ -43,6 +49,7 @@ import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.SearchFragment
 import com.practicum.playlistmaker.search.ui.track.TrackViewHolder
 import com.practicum.playlistmaker.util.debounce
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -74,6 +81,8 @@ class NewPlaylistFragment: Fragment() {
     private lateinit var binding: FragmentNewPlaylistBinding
 
     private val viewmodel by viewModel<PlaylistViewModel>()
+
+    val requester = PermissionRequester.instance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -110,8 +119,16 @@ class NewPlaylistFragment: Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
+//                if (!s.isNullOrEmpty()) {
+//                    // Устанавливаем цвет рамки, как в состоянии фокуса
+//                    binding.textNameInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.main_theme_color)
+//                } else {
+//                    // Возвращаем цвет рамки в исходное состояние
+//                    binding.textNameInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.icon_grey)
+//                }
                 createPlaylist.isEnabled = createButtonEnabled(s)
+
+
 
             }
 
@@ -120,6 +137,14 @@ class NewPlaylistFragment: Fragment() {
             }
         }
         nameTextWatcher?.let { playlistName.addTextChangedListener(it) }
+
+//        playlistName.setOnFocusChangeListener { v, hasFocus ->
+//            if (hasFocus || !playlistName.text.isNullOrEmpty()) {
+//                binding.textNameInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.main_theme_color)
+//            } else {
+//                binding.textNameInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.icon_grey)
+//            }
+//        }
 
         //кнопка назад
         backButton.setOnClickListener {
@@ -145,9 +170,46 @@ class NewPlaylistFragment: Fragment() {
             }
 
 
-        cover.setOnClickListener {
 
-            pickMedia.launch(arrayOf("image/*"))
+
+        cover.setOnClickListener {
+            lifecycleScope.launch {
+                val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    android.Manifest.permission.READ_MEDIA_IMAGES
+                } else {
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                }
+                requester.request(permission).collect { result ->
+                    when (result) {
+                        is PermissionResult.Granted -> {
+                            pickMedia.launch(arrayOf("image/*"))
+                        }
+                        is PermissionResult.Denied.NeedsRationale -> {
+                            Toast.makeText(
+                                requireContext(),
+                                "Для выбора изображения необходимо предоставить доступ к галерее.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        is PermissionResult.Denied.DeniedPermanently -> {
+                            Toast.makeText(
+                                requireContext(),
+                                "Доступ к галерее заблокирован. Разрешите доступ в настройках приложения.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            intent.data= Uri.fromParts("package", context?.packageName ?: "", null)
+                            context?.startActivity(intent)
+                        }
+
+
+                        else -> {
+
+                        }
+                    }
+                }
+            }
         }
 
         createPlaylist.setOnClickListener {

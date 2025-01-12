@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.mediateka.ui.playlist
+package com.practicum.playlistmaker.player.ui.playlist_bottom_sheet
 
 import android.content.Context
 import android.util.TypedValue
@@ -6,16 +6,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.databinding.BottomSheetPlaylistItemBinding
 import com.practicum.playlistmaker.databinding.PlaylistItemBinding
 import com.practicum.playlistmaker.mediateka.domain.models.Playlist
 
-
-class PlaylistViewHolder(private val binding: PlaylistItemBinding): RecyclerView.ViewHolder(binding.root) {
+class BottomSheetPlaylistViewHolder (private val binding: BottomSheetPlaylistItemBinding): RecyclerView.ViewHolder(binding.root) {
     private val image: ImageView = binding.cover
-    private val playlistName: TextView = binding.playlistName
-    private val playlistCount: TextView = binding.playlistCount
+    private val playlistName: TextView = binding.name
+    private val playlistCount: TextView = binding.count
     var onPlaylistClickListener: OnPlaylistClickListener? = null
     fun bind(playlist: Playlist) {
         Glide.with(itemView)

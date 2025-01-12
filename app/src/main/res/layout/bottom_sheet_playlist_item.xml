@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/rootLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/block_height"
+    android:orientation="horizontal"
+    android:paddingHorizontal="@dimen/track_padding_horizontal"
+    android:paddingVertical="@dimen/track_padding_vertical"
+    android:background="?attr/selectableItemBackground">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/cover"
+        style="@style/TrackCover"
+        android:scaleType="centerCrop"
+        android:background="@drawable/rounded_corners"
+        app:shapeAppearanceOverlay="@style/RoundedCorners"
+
+        />
+    <LinearLayout
+        android:layout_height="@dimen/layout_name_height"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_marginVertical="@dimen/layout_name_margin_vertical"
+        android:layout_marginLeft="@dimen/layout_margin_left"
+        android:layout_weight = "100">
+
+        <TextView
+            android:id="@+id/name"
+            style="@style/TrackName"
+            android:ellipsize="end"
+            android:singleLine="true"
+            tools:text="Названиеdfgfgdgdfgdfghfsdhfguygyyqwe" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/layout_performer_name_height"
+            android:orientation="horizontal"
+            android:layout_marginTop="1dp">
+
+            <TextView
+                android:id="@+id/count"
+                style="@style/PerformerName"
+                tools:text="Названиеgdfgdfgdfgfdhggdfhdfdfhdfhjhgkhjfdgdf"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+            />
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

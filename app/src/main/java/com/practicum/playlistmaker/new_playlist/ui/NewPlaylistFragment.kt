@@ -38,10 +38,12 @@ import com.practicum.playlistmaker.databinding.FragmentFavoritesBinding
 import com.practicum.playlistmaker.databinding.FragmentNewPlaylistBinding
 import com.practicum.playlistmaker.mediateka.ui.FavoritesFragment
 import com.practicum.playlistmaker.mediateka.ui.MediatekaFragmentDirections
+import com.practicum.playlistmaker.mediateka.ui.viewmodel.PlaylistViewModel
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.SearchFragment
 import com.practicum.playlistmaker.search.ui.track.TrackViewHolder
 import com.practicum.playlistmaker.util.debounce
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -70,6 +72,8 @@ class NewPlaylistFragment: Fragment() {
 
 
     private lateinit var binding: FragmentNewPlaylistBinding
+
+    private val viewmodel by viewModel<PlaylistViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -140,16 +144,16 @@ class NewPlaylistFragment: Fragment() {
                 }
             }
 
+
         cover.setOnClickListener {
+
             pickMedia.launch(arrayOf("image/*"))
         }
 
         createPlaylist.setOnClickListener {
-            if(imageUri != null)
-                saveImageToPrivateStorage(imageUri!!)
-            Toast.makeText(requireContext(), "Плейлист "+ binding.enterName.text.toString() + " создан", Toast.LENGTH_LONG).show()
+            createPlaylist()
 
-            findNavController().navigateUp()
+            Toast.makeText(requireContext(), "Плейлист "+ binding.enterName.text.toString() + " создан", Toast.LENGTH_LONG).show()
         }
 
 
@@ -174,24 +178,19 @@ class NewPlaylistFragment: Fragment() {
         return !s.isNullOrEmpty()
     }
 
-    private fun saveImageToPrivateStorage(uri: Uri) {
+    private fun saveImageToPrivateStorage(uri: Uri): String {
         val contentResolver = requireActivity().applicationContext.contentResolver
-
-
         //создаём экземпляр класса File, который указывает на нужный каталог
         val filePath = File(requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), getString(R.string.catalog))
         //создаем каталог, если он не создан
         if (!filePath.exists()){
             filePath.mkdirs()
         }
-
         //создаём экземпляр класса File, который указывает на файл внутри каталога
         val file = File(filePath, "playlist_image_$currentDate.jpg")
-
         // передаём необходимый флаг на запись
         val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
         contentResolver.takePersistableUriPermission(uri, takeFlags)
-
         // создаём входящий поток байтов из выбранной картинки
         val inputStream = contentResolver.openInputStream(uri)
         // создаём исходящий поток байтов в созданный выше файл
@@ -200,6 +199,7 @@ class NewPlaylistFragment: Fragment() {
         BitmapFactory
             .decodeStream(inputStream)
             .compress(Bitmap.CompressFormat.JPEG, 30, outputStream)
+        return file.path
     }
 
     private fun onBack() {
@@ -212,5 +212,14 @@ class NewPlaylistFragment: Fragment() {
         else{
             findNavController().navigateUp()
         }
+    }
+
+    private fun createPlaylist(){
+        var path:String? = null
+        if(imageUri != null)
+            path = saveImageToPrivateStorage(imageUri!!)
+        viewmodel.addPlaylist(path, binding.enterName.text.toString(), binding.enterDescription.text.toString())
+
+        findNavController().navigateUp()
     }
 }

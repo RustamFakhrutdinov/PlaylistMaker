@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.di
 import com.practicum.playlistmaker.mediateka.data.reposirtory.FavouriteRepositoryImpl
 import com.practicum.playlistmaker.mediateka.data.converters.PlaylistDbConverter
 import com.practicum.playlistmaker.mediateka.data.converters.TrackFavouriteDbConverter
+import com.practicum.playlistmaker.mediateka.data.converters.TrackInPlaylistsDbConverter
 import com.practicum.playlistmaker.mediateka.data.reposirtory.PlaylistRepositoryImpl
 import com.practicum.playlistmaker.mediateka.domain.db.FavouriteRepository
 import com.practicum.playlistmaker.mediateka.domain.db.PlaylistRepository
@@ -39,12 +40,14 @@ val repositoryModule = module {
 
     factory { PlaylistDbConverter() }
 
+    factory { TrackInPlaylistsDbConverter() }
+
     single<FavouriteRepository> {
         FavouriteRepositoryImpl(get(),get())
     }
 
     single<PlaylistRepository> {
-        PlaylistRepositoryImpl(get(),get())
+        PlaylistRepositoryImpl(get(),get(), get(), get(), get())
     }
 
 

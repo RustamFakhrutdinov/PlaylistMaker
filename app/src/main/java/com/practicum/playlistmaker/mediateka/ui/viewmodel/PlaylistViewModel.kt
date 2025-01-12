@@ -21,15 +21,15 @@ class PlaylistViewModel(
     private val playlistLiveData = MutableLiveData<PlaylistState>()
     fun getPlaylistLiveData(): LiveData<PlaylistState> = playlistLiveData
 
-//    fun fillData() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            playlistInteractor
-//                .getPlaylists()
-//                .collect{ playlists ->
-//                    processResult(playlists)
-//                }
-//        }
-//    }
+    fun fillData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistInteractor
+                .getPlaylists()
+                .collect{ playlists ->
+                    processResult(playlists)
+                }
+        }
+    }
 
     private fun processResult(playlists: List<Playlist>) {
         if (playlists.isEmpty()) {
@@ -40,5 +40,11 @@ class PlaylistViewModel(
     }
     private fun renderState(state: PlaylistState) {
         playlistLiveData.postValue(state)
+    }
+
+    fun addPlaylist(path: String?, name: String, description: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistInteractor.addPlaylist(Playlist(0,name,description,path,null,0))
+        }
     }
 }

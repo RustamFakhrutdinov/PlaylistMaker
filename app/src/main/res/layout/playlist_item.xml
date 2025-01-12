@@ -5,15 +5,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@null"
+    style="@style/SwitchBackColor"
     card_view:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="16dp">
+
+        android:paddingVertical="8dp">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/cover"
@@ -21,7 +21,7 @@
             android:layout_height="0dp"
             android:scaleType="centerCrop"
             android:background="@drawable/rounded_corners"
-            android:padding="0dp"
+            android:paddingHorizontal="4dp"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -39,6 +39,7 @@
             android:layout_marginTop="0dp"
             android:ellipsize="end"
             android:singleLine="true"
+            android:paddingHorizontal="4dp"
             app:layout_constrainedWidth="true"
             android:textSize="12sp"
             android:fontFamily="@font/ys_display_regular"
@@ -57,6 +58,7 @@
             android:layout_marginTop="0dp"
             android:ellipsize="end"
             android:singleLine="true"
+            android:paddingHorizontal="4dp"
             app:layout_constrainedWidth="true"
             android:textSize="12sp"
             android:fontFamily="@font/ys_display_regular"

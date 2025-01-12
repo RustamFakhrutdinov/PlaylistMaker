@@ -16,7 +16,7 @@ val viewModelModule = module {
     }
 
     viewModel {
-        PlayerViewModel(get(), get())
+        PlayerViewModel(get(), get(), get(),androidContext())
     }
 
     viewModel {

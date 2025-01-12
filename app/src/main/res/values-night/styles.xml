@@ -270,4 +270,22 @@
         <item name="backgroundTint">@color/another_black</item>
     </style>
 
+    <style name="SwitchBackColor">
+        <item name="android:backgroundTint">@color/another_black</item>
+    </style>
+
+    <style name="BottomSheetPlaylistsLinearLayout">
+        <item name="android:backgroundTint">@color/another_black</item>
+        <item name="android:background">@drawable/bottom_sheet_rounder</item>
+    </style>
+
+    <style name="DragItem">
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:background">@drawable/rounder</item>
+    </style>
+
+    <style name="TextColor">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
 </resources>

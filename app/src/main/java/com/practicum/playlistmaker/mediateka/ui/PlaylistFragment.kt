@@ -7,9 +7,12 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentPlaylistBinding
 import com.practicum.playlistmaker.mediateka.domain.models.Playlist
+import com.practicum.playlistmaker.mediateka.ui.playlist.PlaylistAdapter
 import com.practicum.playlistmaker.mediateka.ui.state.FavouriteTracksState
 import com.practicum.playlistmaker.mediateka.ui.state.PlaylistState
 import com.practicum.playlistmaker.mediateka.ui.viewmodel.PlaylistViewModel
@@ -26,6 +29,9 @@ class PlaylistFragment: Fragment() {
             }
         }
     }
+    private lateinit var playlistListView: RecyclerView
+    private var playlistList = mutableListOf<Playlist>()
+    private val playlistAdapter = PlaylistAdapter(playlistList)
 
     private val playlistViewModel: PlaylistViewModel by viewModel()
     private lateinit var binding: FragmentPlaylistBinding
@@ -42,12 +48,11 @@ class PlaylistFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-       // playlistViewModel.fillData()
+        playlistViewModel.fillData()
 
-//        playlistViewModel.getPlaylistLiveData().observe(viewLifecycleOwner) {
-//            render(it)
-//        }
-        showEmpty("afdsghfgh")
+        playlistViewModel.getPlaylistLiveData().observe(viewLifecycleOwner) {
+            render(it)
+        }
         binding.createPlaylistButton.setOnClickListener {
             findNavController().navigate(R.id.action_mediatekaFragment_to_newPlaylistFragment)
         }
@@ -61,6 +66,18 @@ class PlaylistFragment: Fragment() {
     }
 
     private fun showContent(playlists: List<Playlist>) {
+        binding.apply {
+            createPlaylistButton.isVisible = true
+            coverEmpty.isVisible = false
+            placeholderMessage.isVisible = false
+            rvPlaylistItem.isVisible = true
+            playlistListView = binding.rvPlaylistItem
+            playlistListView.layoutManager = GridLayoutManager(requireContext(), 2)
+            playlistListView.adapter = playlistAdapter
+        }
+        playlistList.clear()
+        playlistList.addAll(playlists)
+        playlistAdapter.notifyDataSetChanged()
 
     }
 

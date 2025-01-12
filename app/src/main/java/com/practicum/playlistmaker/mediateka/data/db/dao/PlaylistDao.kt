@@ -26,10 +26,10 @@ interface PlaylistDao {
 
     // обновить треки в плейлисте
     @Query("UPDATE playlist_table SET trackIdList = :newTrackIdList WHERE playlistId = :identificator")
-    fun setTrackIdListByPlaylistId(newTrackIdList: String, identificator: Int)
+    fun addTrackIdToPlaylist(newTrackIdList: String, identificator: Int)
 
     //обновить значение count в плейлисте
     @Query("UPDATE playlist_table SET count = count+1 WHERE playlistId = :identificator")
-    fun countPlusOne(identificator: Int)
+    fun countPlus(identificator: Int)
 
 }

@@ -38,6 +38,7 @@
     <string name="dialog_cancel">Отмена</string>
     <string name="dialog_complete">Завершить</string>
     <string name="no_playlists">Вы не создали \nни одного плейлиста</string>
+    <string name="add_to_playlist">Добавить в плейлист</string>
 
 
 

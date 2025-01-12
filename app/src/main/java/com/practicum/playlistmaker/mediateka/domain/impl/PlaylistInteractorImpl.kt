@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.mediateka.domain.impl
 
+import com.practicum.playlistmaker.di.repositoryModule
 import com.practicum.playlistmaker.mediateka.domain.db.PlaylistInteractor
 import com.practicum.playlistmaker.mediateka.domain.db.PlaylistRepository
 import com.practicum.playlistmaker.mediateka.domain.models.Playlist
@@ -22,6 +23,6 @@ class PlaylistInteractorImpl(
     }
 
     override suspend fun addTrackIdToPlaylist(track: Track, playlistId: Int) {
-        TODO("Not yet implemented")
+        return playlistRepository.addTrackIdToPlaylist(track, playlistId)
     }
 }

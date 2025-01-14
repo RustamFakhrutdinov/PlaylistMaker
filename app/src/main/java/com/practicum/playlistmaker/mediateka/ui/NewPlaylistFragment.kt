@@ -1,9 +1,8 @@
-package com.practicum.playlistmaker.new_playlist.ui
+package com.practicum.playlistmaker.mediateka.ui
 
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -15,40 +14,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatButton
-import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.markodevcic.peko.PermissionRequester
 import com.markodevcic.peko.PermissionResult
 
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.FragmentFavoritesBinding
 import com.practicum.playlistmaker.databinding.FragmentNewPlaylistBinding
-import com.practicum.playlistmaker.mediateka.ui.FavoritesFragment
-import com.practicum.playlistmaker.mediateka.ui.MediatekaFragmentDirections
 import com.practicum.playlistmaker.mediateka.ui.viewmodel.PlaylistViewModel
-import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.SearchFragment
-import com.practicum.playlistmaker.search.ui.track.TrackViewHolder
-import com.practicum.playlistmaker.util.debounce
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
@@ -57,16 +39,19 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class NewPlaylistFragment: Fragment() {
+class NewPlaylistFragment : Fragment() {
 
     companion object {
         const val SEARCH_NAME = "TEXT_WATCHER_NAME"
         const val NAME_DEF = ""
 
     }
+
     var imageUri: Uri? = null
-    private val currentDate by lazy {SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-        .format(Date())}
+    private val currentDate by lazy {
+        SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+            .format(Date())
+    }
     private var editTextValue: String = SearchFragment.NAME_DEF
     private lateinit var nameTextWatcher: TextWatcher
 
@@ -89,7 +74,7 @@ class NewPlaylistFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        binding = FragmentNewPlaylistBinding.inflate(inflater,container,false)
+        binding = FragmentNewPlaylistBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -119,17 +104,7 @@ class NewPlaylistFragment: Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-//                if (!s.isNullOrEmpty()) {
-//                    // Устанавливаем цвет рамки, как в состоянии фокуса
-//                    binding.textNameInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.main_theme_color)
-//                } else {
-//                    // Возвращаем цвет рамки в исходное состояние
-//                    binding.textNameInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.icon_grey)
-//                }
                 createPlaylist.isEnabled = createButtonEnabled(s)
-
-
-
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -138,25 +113,19 @@ class NewPlaylistFragment: Fragment() {
         }
         nameTextWatcher?.let { playlistName.addTextChangedListener(it) }
 
-//        playlistName.setOnFocusChangeListener { v, hasFocus ->
-//            if (hasFocus || !playlistName.text.isNullOrEmpty()) {
-//                binding.textNameInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.main_theme_color)
-//            } else {
-//                binding.textNameInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.icon_grey)
-//            }
-//        }
-
         //кнопка назад
         backButton.setOnClickListener {
             onBack()
         }
 
         //системная кнопка назад
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                onBack()
-            }
-        })
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    onBack()
+                }
+            })
 
         val pickMedia =
             registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -174,16 +143,18 @@ class NewPlaylistFragment: Fragment() {
 
         cover.setOnClickListener {
             lifecycleScope.launch {
-                val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                    android.Manifest.permission.READ_MEDIA_IMAGES
-                } else {
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE
-                }
+                val permission =
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        android.Manifest.permission.READ_MEDIA_IMAGES
+                    } else {
+                        android.Manifest.permission.READ_EXTERNAL_STORAGE
+                    }
                 requester.request(permission).collect { result ->
                     when (result) {
                         is PermissionResult.Granted -> {
                             pickMedia.launch(arrayOf("image/*"))
                         }
+
                         is PermissionResult.Denied.NeedsRationale -> {
                             Toast.makeText(
                                 requireContext(),
@@ -191,6 +162,7 @@ class NewPlaylistFragment: Fragment() {
                                 Toast.LENGTH_LONG
                             ).show()
                         }
+
                         is PermissionResult.Denied.DeniedPermanently -> {
                             Toast.makeText(
                                 requireContext(),
@@ -199,7 +171,7 @@ class NewPlaylistFragment: Fragment() {
                             ).show()
                             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            intent.data= Uri.fromParts("package", context?.packageName ?: "", null)
+                            intent.data = Uri.fromParts("package", context?.packageName ?: "", null)
                             context?.startActivity(intent)
                         }
 
@@ -215,7 +187,11 @@ class NewPlaylistFragment: Fragment() {
         createPlaylist.setOnClickListener {
             createPlaylist()
 
-            Toast.makeText(requireContext(), "Плейлист "+ binding.enterName.text.toString() + " создан", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                "Плейлист " + binding.enterName.text.toString() + " создан",
+                Toast.LENGTH_LONG
+            ).show()
         }
 
 
@@ -240,48 +216,24 @@ class NewPlaylistFragment: Fragment() {
         return !s.isNullOrEmpty()
     }
 
-    private fun saveImageToPrivateStorage(uri: Uri): String {
-        val contentResolver = requireActivity().applicationContext.contentResolver
-        //создаём экземпляр класса File, который указывает на нужный каталог
-        val filePath = File(requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), getString(R.string.catalog))
-        //создаем каталог, если он не создан
-        if (!filePath.exists()){
-            filePath.mkdirs()
-        }
-        //создаём экземпляр класса File, который указывает на файл внутри каталога
-        val file = File(filePath, "playlist_image_$currentDate.jpg")
-        // передаём необходимый флаг на запись
-        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        contentResolver.takePersistableUriPermission(uri, takeFlags)
-        // создаём входящий поток байтов из выбранной картинки
-        val inputStream = contentResolver.openInputStream(uri)
-        // создаём исходящий поток байтов в созданный выше файл
-        val outputStream = FileOutputStream(file)
-        // записываем картинку с помощью BitmapFactory
-        BitmapFactory
-            .decodeStream(inputStream)
-            .compress(Bitmap.CompressFormat.JPEG, 30, outputStream)
-        return file.path
-    }
-
     private fun onBack() {
 
         if (!binding.enterName.text.isNullOrBlank() ||
             !binding.enterDescription.text.isNullOrBlank() ||
             binding.cover.drawable != startDrawable
-            )
+        )
             confirmationDialog.show()
-        else{
+        else {
             findNavController().navigateUp()
         }
     }
 
-    private fun createPlaylist(){
-        var path:String? = null
-        if(imageUri != null)
-            path = saveImageToPrivateStorage(imageUri!!)
-        viewmodel.addPlaylist(path, binding.enterName.text.toString(), binding.enterDescription.text.toString())
-
+    private fun createPlaylist() {
+        viewmodel.addPlaylist(
+            binding.enterName.text.toString(),
+            binding.enterDescription.text.toString(),
+            imageUri
+        )
         findNavController().navigateUp()
     }
 }

@@ -1,16 +1,9 @@
 package com.practicum.playlistmaker.player.data
 
 import android.media.MediaPlayer
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import com.practicum.playlistmaker.mediateka.data.db.AppDatabase
-import com.practicum.playlistmaker.player.domain.PlayerInteractor
 import com.practicum.playlistmaker.player.domain.PlayerRepository
 import com.practicum.playlistmaker.search.domain.history.SearchHistoryInteractor
 import com.practicum.playlistmaker.search.domain.models.Track
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -22,11 +15,10 @@ class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer,
         return mediaPlayer.isPlaying
     }
 
-    override fun preparePlayer() {
-        val previewUrl = loadTrackData().previewUrl
-        if (previewUrl != "No previewUrl") {
+    override fun preparePlayer(url: String) {
+        if (url != "No previewUrl") {
             try {
-                mediaPlayer.setDataSource(previewUrl)
+                mediaPlayer.setDataSource(url)
                 mediaPlayer.prepare()
             } catch (e: IOException) {
                 e.printStackTrace()

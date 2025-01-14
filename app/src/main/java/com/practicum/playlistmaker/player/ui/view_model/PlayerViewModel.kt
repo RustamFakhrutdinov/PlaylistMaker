@@ -40,10 +40,6 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor,
     private val trackInPlaylistLiveData = MutableLiveData<TrackInPlaylistState>()
     fun getTrackInPlaylistLiveData(): LiveData<TrackInPlaylistState> = trackInPlaylistLiveData
 
-
-    init {
-        preparePlayer()
-    }
     private var timerJob: Job? = null
 
     private lateinit var clickDebounce: (Track) -> Unit
@@ -95,8 +91,8 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor,
         playerInteractor.release()
     }
 
-    private fun preparePlayer() {
-        playerInteractor.preparePlayer()
+    fun preparePlayer(url: String) {
+        playerInteractor.preparePlayer(url)
     }
 
     fun onFavoriteClicked(track: Track) {

@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.mediateka.domain.impl
 
+import android.net.Uri
 import com.practicum.playlistmaker.di.repositoryModule
 import com.practicum.playlistmaker.mediateka.domain.db.PlaylistInteractor
 import com.practicum.playlistmaker.mediateka.domain.db.PlaylistRepository
@@ -10,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 class PlaylistInteractorImpl(
     private val playlistRepository: PlaylistRepository
 ): PlaylistInteractor {
-    override suspend fun addPlaylist(playlist: Playlist) {
-        playlistRepository.addPlaylist(playlist)
+    override suspend fun addPlaylist(playlist: Playlist,uri: Uri?) {
+        playlistRepository.addPlaylist(playlist, uri)
     }
 
     override suspend fun deletePlaylist(playlist: Playlist) {
@@ -24,5 +25,9 @@ class PlaylistInteractorImpl(
 
     override suspend fun addTrackIdToPlaylist(track: Track, playlistId: Int) {
         return playlistRepository.addTrackIdToPlaylist(track, playlistId)
+    }
+
+    override suspend fun getTrackListFromPlaylist(playlistId: Int): Flow<List<Track>> {
+        return playlistRepository.getTrackListFromPlaylist(playlistId)
     }
 }

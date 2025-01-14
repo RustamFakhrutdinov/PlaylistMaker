@@ -15,6 +15,7 @@ import com.practicum.playlistmaker.search.domain.api.TracksRepository
 import com.practicum.playlistmaker.search.domain.history.SearchHistoryRepository
 import com.practicum.playlistmaker.settings.data.SettingsRepositoryImpl
 import com.practicum.playlistmaker.settings.domain.SettingsRepository
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -47,7 +48,7 @@ val repositoryModule = module {
     }
 
     single<PlaylistRepository> {
-        PlaylistRepositoryImpl(get(),get(), get(), get(), get())
+        PlaylistRepositoryImpl(get(),get(), get(), get(), get(),androidContext())
     }
 
 

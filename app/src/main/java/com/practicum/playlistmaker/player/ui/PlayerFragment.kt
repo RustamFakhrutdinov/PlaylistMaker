@@ -86,6 +86,7 @@ class PlayerFragment : Fragment() {
 
 
         track = args.track
+        viewModel.preparePlayer(track.previewUrl)
         viewModel.isFavourite(track)
 
         viewModel.fillPlaylistData()

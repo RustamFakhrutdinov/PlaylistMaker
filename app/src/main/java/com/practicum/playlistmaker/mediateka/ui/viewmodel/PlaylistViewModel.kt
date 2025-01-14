@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker.mediateka.ui.viewmodel
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,6 +22,28 @@ class PlaylistViewModel(
     private val playlistLiveData = MutableLiveData<PlaylistState>()
     fun getPlaylistLiveData(): LiveData<PlaylistState> = playlistLiveData
 
+    private var tracksLiveData = MutableLiveData<FavouriteTracksState>()
+    fun getTracksLiveData(): LiveData<FavouriteTracksState> = tracksLiveData
+
+    fun loadTrackList(playlistId:Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistInteractor
+                .getTrackListFromPlaylist(playlistId)
+                .collect{tracks ->
+                    processResultForTrackList(tracks)
+                }
+        }
+    }
+    private fun processResultForTrackList(tracks: List<Track>) {
+        if (tracks.isNullOrEmpty()) {
+            renderStateForTracks(FavouriteTracksState.Empty(context.getString(R.string.no_tracks_in_playlist)))
+        } else {
+            renderStateForTracks(FavouriteTracksState.Content(tracks))
+        }
+    }
+    private fun renderStateForTracks(state: FavouriteTracksState) {
+        tracksLiveData.postValue(state)
+    }
     fun fillData() {
         viewModelScope.launch(Dispatchers.IO) {
             playlistInteractor
@@ -30,7 +53,6 @@ class PlaylistViewModel(
                 }
         }
     }
-
     private fun processResult(playlists: List<Playlist>) {
         if (playlists.isEmpty()) {
             renderState(PlaylistState.Empty(context.getString(R.string.no_playlists)))
@@ -42,9 +64,9 @@ class PlaylistViewModel(
         playlistLiveData.postValue(state)
     }
 
-    fun addPlaylist(path: String?, name: String, description: String) {
+    fun addPlaylist(name: String, description: String, uri: Uri?) {
         viewModelScope.launch(Dispatchers.IO) {
-            playlistInteractor.addPlaylist(Playlist(0,name,description,path,null,0))
+            playlistInteractor.addPlaylist(Playlist(0,name,description,null,null,0),uri)
         }
     }
 }

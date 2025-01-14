@@ -9,8 +9,8 @@ class PlayerInteractorImpl(private val repository: PlayerRepository): PlayerInte
         return repository.isPlaying()
     }
 
-    override fun preparePlayer() {
-        repository.preparePlayer()
+    override fun preparePlayer(url: String) {
+        repository.preparePlayer(url)
     }
 
     override fun getTime(): String {

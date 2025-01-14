@@ -8,6 +8,7 @@ import androidx.room.Query
 import com.practicum.playlistmaker.mediateka.data.db.entity.PlaylistEntity
 import com.practicum.playlistmaker.mediateka.data.db.entity.TrackFavouriteEntity
 import kotlinx.coroutines.flow.Flow
+
 @Dao
 interface PlaylistDao {
     @Insert(entity = PlaylistEntity::class, onConflict = OnConflictStrategy.REPLACE)

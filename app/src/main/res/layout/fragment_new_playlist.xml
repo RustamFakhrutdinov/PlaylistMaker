@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.practicum.playlistmaker.new_playlist.ui.NewPlaylistFragment">
+    tools:context="com.practicum.playlistmaker.mediateka.ui.NewPlaylistFragment">
 
     <ScrollView
         android:id="@+id/scrollView"

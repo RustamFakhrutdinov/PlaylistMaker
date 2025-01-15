@@ -10,25 +10,25 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlaylistDbConverter {
-    fun map(playlist: PlaylistDto): PlaylistEntity {
+    fun map(playlist: PlaylistDto?): PlaylistEntity {
         return PlaylistEntity(
-            playlist.playlistId?:0,
-            playlist.name?:"",
-            playlist.description,
-            playlist.path,
-            playlist.trackIdList,
-            playlist.count?:0
+            playlist?.playlistId ?: 0,
+            playlist?.name ?: "",
+            playlist?.description,
+            playlist?.path,
+            playlist?.trackIdList,
+            playlist?.count ?: 0
         )
     }
 
-    fun map(playlist: PlaylistEntity): Playlist {
+    fun map(playlist: PlaylistEntity?): Playlist {
         return Playlist(
-            playlist.playlistId,
-            playlist.name,
-            playlist.description,
-            playlist.path,
-            playlist.trackIdList,
-            playlist.count
+            playlist?.playlistId ?: 0,
+            playlist?.name ?: "",
+            playlist?.description,
+            playlist?.path,
+            playlist?.trackIdList,
+            playlist?.count ?: 0
         )
     }
 }

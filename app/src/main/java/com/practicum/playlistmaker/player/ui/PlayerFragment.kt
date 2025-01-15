@@ -127,7 +127,10 @@ class PlayerFragment : Fragment() {
         addInformation()
 
         binding.createPlaylistButton.setOnClickListener {
-            findNavController().navigate(R.id.action_playerFragment_to_newPlaylistFragment)
+            val playlist = Playlist(-1, "", null, null, null, 0)
+            val direction: NavDirections =
+                PlayerFragmentDirections.actionPlayerFragmentToNewPlaylistFragment(playlist)
+            findNavController().navigate(direction)
         }
         viewModel.getPlaylistLiveData().observe(viewLifecycleOwner) {
             render(it)
@@ -189,7 +192,7 @@ class PlayerFragment : Fragment() {
     private fun showPlaylistAdded(name: String) {
         val bottomSheetContainer = binding.standardBottomSheet
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetContainer)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        // bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         Toast.makeText(requireContext(), "Добавлено в плейлист $name", Toast.LENGTH_LONG).show()
     }

@@ -10,17 +10,17 @@ import kotlinx.coroutines.flow.Flow
 
 class PlaylistInteractorImpl(
     private val playlistRepository: PlaylistRepository
-): PlaylistInteractor {
-    override suspend fun addPlaylist(playlist: Playlist,uri: Uri?) {
+) : PlaylistInteractor {
+    override suspend fun addPlaylist(playlist: Playlist, uri: Uri?) {
         playlistRepository.addPlaylist(playlist, uri)
     }
 
-    override suspend fun deletePlaylist(playlist: Playlist) {
-        playlistRepository.deletePlaylist(playlist)
+    override suspend fun deletePlaylist(playlistId: Int) {
+        playlistRepository.deletePlaylist(playlistId)
     }
 
     override suspend fun getPlaylists(): Flow<List<Playlist>> {
-       return playlistRepository.getPlaylists()
+        return playlistRepository.getPlaylists()
     }
 
     override suspend fun addTrackIdToPlaylist(track: Track, playlistId: Int) {
@@ -30,4 +30,27 @@ class PlaylistInteractorImpl(
     override suspend fun getTrackListFromPlaylist(playlistId: Int): Flow<List<Track>> {
         return playlistRepository.getTrackListFromPlaylist(playlistId)
     }
+
+    override suspend fun deleteTrackFromPlaylist(track: Track, playlistId: Int) {
+        return playlistRepository.deleteTrackFromPlaylist(track, playlistId)
+    }
+
+    override suspend fun getPlaylistCount(playlistId: Int): Int {
+        return playlistRepository.getPlaylistCount(playlistId)
+    }
+
+    override suspend fun getPlaylistById(playlistId: Int): Flow<Playlist?>? {
+        return playlistRepository.getPlaylistById(playlistId)
+    }
+
+    override suspend fun editPlaylist(
+        playlistId: Int,
+        newName: String,
+        newDescription: String?,
+        newPath: Uri?
+    ) {
+        return playlistRepository.editPlaylist(playlistId, newName, newDescription, newPath)
+    }
+
+
 }

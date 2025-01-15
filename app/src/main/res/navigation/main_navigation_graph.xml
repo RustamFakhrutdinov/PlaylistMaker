@@ -40,6 +40,9 @@
         android:name="com.practicum.playlistmaker.mediateka.ui.NewPlaylistFragment"
         android:label="fragment_new_playlist"
         tools:layout="@layout/fragment_new_playlist" >
+        <argument
+            android:name="playlist"
+            app:argType="com.practicum.playlistmaker.mediateka.domain.models.Playlist" />
         <action
             android:id="@+id/action_newPlaylistFragment_to_playerFragment"
             app:destination="@id/playerFragment" />
@@ -67,5 +70,8 @@
         <action
             android:id="@+id/action_chosenPlaylistFragment_to_playerFragment"
             app:destination="@id/playerFragment" />
+        <action
+            android:id="@+id/action_chosenPlaylistFragment_to_newPlaylistFragment"
+            app:destination="@id/newPlaylistFragment" />
     </fragment>
 </navigation>

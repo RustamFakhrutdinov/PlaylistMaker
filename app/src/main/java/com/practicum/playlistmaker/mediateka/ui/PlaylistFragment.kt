@@ -19,6 +19,7 @@ import com.practicum.playlistmaker.mediateka.ui.playlist.PlaylistViewHolder
 import com.practicum.playlistmaker.mediateka.ui.state.FavouriteTracksState
 import com.practicum.playlistmaker.mediateka.ui.state.PlaylistState
 import com.practicum.playlistmaker.mediateka.ui.viewmodel.PlaylistViewModel
+import com.practicum.playlistmaker.player.ui.PlayerFragmentDirections
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.SearchFragmentDirections
 import com.practicum.playlistmaker.search.ui.track.TrackViewHolder
@@ -26,7 +27,7 @@ import com.practicum.playlistmaker.util.debounce
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class PlaylistFragment: Fragment() {
+class PlaylistFragment : Fragment() {
     companion object {
         private const val PLAYLIST_NUM = "playlist_number"
 
@@ -36,6 +37,7 @@ class PlaylistFragment: Fragment() {
             }
         }
     }
+
     private lateinit var playlistListView: RecyclerView
     private var playlistList = mutableListOf<Playlist>()
     private val playlistAdapter = PlaylistAdapter(playlistList)
@@ -57,22 +59,28 @@ class PlaylistFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        playlistViewModel.fillData()
+        playlistViewModel.fillPlaylistsData()
 
         playlistViewModel.getPlaylistLiveData().observe(viewLifecycleOwner) {
             render(it)
         }
         binding.createPlaylistButton.setOnClickListener {
-            findNavController().navigate(R.id.action_mediatekaFragment_to_newPlaylistFragment)
+            val playlist = Playlist(-1, "", null, null, null, 0)
+            val direction: NavDirections =
+                MediatekaFragmentDirections.actionMediatekaFragmentToNewPlaylistFragment(playlist)
+            findNavController().navigate(direction)
+            // findNavController().navigate(R.id.action_mediatekaFragment_to_newPlaylistFragment)
         }
         clickDebounce = debounce<Playlist>(500L, viewLifecycleOwner.lifecycleScope, false) { item ->
-            val direction: NavDirections = MediatekaFragmentDirections.actionMediatekaFragmentToChosenPlaylistFragment(item)
+            val direction: NavDirections =
+                MediatekaFragmentDirections.actionMediatekaFragmentToChosenPlaylistFragment(item)
             findNavController().navigate(direction)
         }
-        playlistAdapter.onPlaylistClickListener= PlaylistViewHolder.OnPlaylistClickListener {item ->
-            clickDebounce(item)
+        playlistAdapter.onPlaylistClickListener =
+            PlaylistViewHolder.OnPlaylistClickListener { item ->
+                clickDebounce(item)
 
-        }
+            }
 
 
     }
@@ -80,7 +88,7 @@ class PlaylistFragment: Fragment() {
     private fun render(state: PlaylistState) {
         when (state) {
             is PlaylistState.Empty -> showEmpty(state.message)
-            is PlaylistState.Content ->showContent(state.playlists)
+            is PlaylistState.Content -> showContent(state.playlists)
         }
     }
 
@@ -106,6 +114,7 @@ class PlaylistFragment: Fragment() {
             coverEmpty.isVisible = true
             placeholderMessage.isVisible = true
             placeholderMessage.text = message
+            rvPlaylistItem.isVisible = false
         }
     }
 }

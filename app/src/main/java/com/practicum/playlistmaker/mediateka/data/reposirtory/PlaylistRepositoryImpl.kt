@@ -7,28 +7,25 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.mediateka.data.converters.PlaylistDbConverter
 import com.practicum.playlistmaker.mediateka.data.converters.TrackInPlaylistsDbConverter
 import com.practicum.playlistmaker.mediateka.data.db.dao.PlaylistDao
 import com.practicum.playlistmaker.mediateka.data.db.dao.TrackInPlaylistsDao
 import com.practicum.playlistmaker.mediateka.data.db.entity.PlaylistEntity
+import com.practicum.playlistmaker.mediateka.data.db.entity.TrackInPlaylistsEntity
 import com.practicum.playlistmaker.mediateka.data.dto.PlaylistDto
 import com.practicum.playlistmaker.mediateka.domain.db.PlaylistRepository
 import com.practicum.playlistmaker.mediateka.domain.models.Playlist
 import com.practicum.playlistmaker.search.data.dto.TrackDto
-import com.practicum.playlistmaker.search.data.history.HISTORY_TRACK_KEY
 import com.practicum.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.Date
 import java.util.Locale
 
@@ -59,16 +56,13 @@ class PlaylistRepositoryImpl(
         )
     }
 
-    override suspend fun deletePlaylist(playlist: Playlist) {
-        val playlistDto = PlaylistDto(
-            playlist.playlistId,
-            playlist.name,
-            playlist.description,
-            playlist.path,
-            playlist.trackIdList,
-            playlist.count
-        )
-        playlistDao.deletePlaylist(playlistDbConverter.map(playlistDto))
+    override suspend fun deletePlaylist(playlistId: Int) {
+        val trackIdList = readTrackListFromBD(playlistId)
+        playlistDao.deletePlaylist(playlistId)
+        for (trackId in trackIdList) {
+            deleteTrackFromTrackInPlaylist(trackId)
+        }
+
     }
 
     override suspend fun getPlaylists(): Flow<List<Playlist>> {
@@ -79,7 +73,7 @@ class PlaylistRepositoryImpl(
 
 
     override suspend fun addTrackIdToPlaylist(track: Track, playlistId: Int) {
-        playlistDao.addTrackIdToPlaylist(convertToString(track, playlistId), playlistId)
+        playlistDao.addTrackIdsToPlaylist(convertToStringAdd(track, playlistId), playlistId)
         playlistDao.countPlus(playlistId)
         val trackDto = TrackDto(
             track.trackId,
@@ -93,20 +87,73 @@ class PlaylistRepositoryImpl(
             track.country,
             track.previewUrl
         )
-        trackInPlaylistsDao.insertTrackInPlaylists(trackInPlaylistsDbConverter.map(trackDto))
-
+        trackInPlaylistsDao.insertTrackInPlaylists(
+            trackInPlaylistsDbConverter.map(
+                trackDto,
+                Instant.now().epochSecond
+            )
+        )
     }
 
-    override suspend fun getTrackListFromPlaylist(playlistId: Int): Flow<List<Track>> = flow {
-        val trackIdList = readTrackListFromBD(playlistId)
-        val trackList: MutableList<Track> = arrayListOf()
-        if (!trackIdList.isNullOrEmpty()) {
-            trackIdList.forEach { id ->
-                var track = trackInPlaylistsDbConverter.map(trackInPlaylistsDao.getTrack(id)!!)
-                trackList.add(track)
+    override suspend fun deleteTrackFromPlaylist(track: Track, playlistId: Int) {
+        playlistDao.addTrackIdsToPlaylist(convertToStringDelete(track, playlistId), playlistId)
+        playlistDao.countMinus(playlistId)
+        deleteTrackFromTrackInPlaylist(track.trackId!!)
+    }
+
+    override suspend fun getPlaylistCount(playlistId: Int): Int {
+        return playlistDao.getCountOfPlaylist(playlistId)
+    }
+
+    override suspend fun getPlaylistById(playlistId: Int): Flow<Playlist?>? {
+        return playlistDao.getPlaylistById(playlistId).map { playlist ->
+            if (playlist != null) {
+                playlistDbConverter.map(playlist)
+            } else {
+                null // Возвращайте null, если запись не найдена
             }
         }
-        emit(trackList)
+    }
+
+    override suspend fun editPlaylist(
+        playlistId: Int,
+        newName: String,
+        newDescription: String?,
+        newPath: Uri?
+    ) {
+        var pathUri: String? = null
+        if (newPath != null)
+            pathUri = saveImageToPrivateStorage(newPath!!)
+        playlistDao.updatePlaylistDetails(playlistId, newName, newDescription, pathUri)
+    }
+
+    override suspend fun getTrackListFromPlaylist(playlistId: Int): Flow<List<Track>> {
+        val trackIdList = readTrackListFromBD(playlistId)
+        return trackInPlaylistsDao.getTracksByIds(trackIdList).map { tracks ->
+            convertFromTracksEntity(tracks)
+        }
+    }
+
+    private fun deleteTrackFromTrackInPlaylist(trackId: Int) {
+        val playlistCount = playlistDao.getPlaylistsCount()
+
+        val playlistList = playlistDao.getPlaylistsNotFlow()
+        if (playlistCount != null) {
+            var containsFlag: Boolean = false
+            for (playlist in playlistList) {
+                val trackList = readTrackListFromBD(playlist.playlistId)
+                if (!trackList.isNullOrEmpty()) {
+                    if (trackList.contains(trackId)) {
+                        containsFlag = true
+                        break
+                    }
+                }
+            }
+            if (!containsFlag) {
+                trackInPlaylistsDao.deleteTrackById(trackId)
+            }
+
+        }
     }
 
 
@@ -115,7 +162,14 @@ class PlaylistRepositoryImpl(
     }
 
 
-    private suspend fun readTrackListFromBD(playlistId: Int): ArrayList<Int> {
+    private fun convertFromTracksEntity(tracks: List<TrackInPlaylistsEntity>): List<Track> {
+        return tracks.map { track ->
+            trackInPlaylistsDbConverter.map(track)
+        }
+    }
+
+
+    private fun readTrackListFromBD(playlistId: Int): ArrayList<Int> {
 
         val json: String? = playlistDao.getTrackIdList(playlistId)
         if (json.isNullOrEmpty()) {
@@ -126,10 +180,15 @@ class PlaylistRepositoryImpl(
         return Gson().fromJson(json, itemType)
     }
 
-    private suspend fun convertToString(track: Track, playlistId: Int): String {
-
+    private fun convertToStringAdd(track: Track, playlistId: Int): String {
         var trackList = readTrackListFromBD(playlistId)
         trackList.add(track.trackId!!)
+        return json.toJson(trackList)
+    }
+
+    private fun convertToStringDelete(track: Track, playlistId: Int): String {
+        var trackList = readTrackListFromBD(playlistId)
+        trackList.remove(track.trackId)
         return json.toJson(trackList)
     }
 
@@ -167,31 +226,5 @@ class PlaylistRepositoryImpl(
 
         return file.path
     }
-
-
-//    private fun saveImageToPrivateStorage(uri: Uri): String {
-//        val contentResolver = requireActivity().applicationContext.contentResolver
-//        //создаём экземпляр класса File, который указывает на нужный каталог
-//        val filePath = File(requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), getString(R.string.catalog))
-//        //создаем каталог, если он не создан
-//        if (!filePath.exists()){
-//            filePath.mkdirs()
-//        }
-//        //создаём экземпляр класса File, который указывает на файл внутри каталога
-//        val file = File(filePath, "playlist_image_$currentDate.jpg")
-//        // передаём необходимый флаг на запись
-//        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
-//        contentResolver.takePersistableUriPermission(uri, takeFlags)
-//        // создаём входящий поток байтов из выбранной картинки
-//        val inputStream = contentResolver.openInputStream(uri)
-//        // создаём исходящий поток байтов в созданный выше файл
-//        val outputStream = FileOutputStream(file)
-//        // записываем картинку с помощью BitmapFactory
-//        BitmapFactory
-//            .decodeStream(inputStream)
-//            .compress(Bitmap.CompressFormat.JPEG, 30, outputStream)
-//        return file.path
-//    }
-
 
 }

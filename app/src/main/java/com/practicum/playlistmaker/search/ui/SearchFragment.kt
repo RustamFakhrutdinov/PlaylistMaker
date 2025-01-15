@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.mediateka.ui.MediatekaFragmentDirections
-import com.practicum.playlistmaker.player.ui.PlayerActivity
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.state.SearchState
 import com.practicum.playlistmaker.search.ui.track.TrackAdapter
@@ -57,10 +56,6 @@ class SearchFragment: Fragment() {
 
     private var historyTracksList = arrayListOf<Track>()
     private val historyTrackAdapter = TrackAdapter(historyTracksList)
-
-
-    private var isClickAllowed = true
-    private val handler = Handler(Looper.getMainLooper())
 
     private val viewModel: SearchViewModel by viewModel()
     private lateinit var binding: FragmentSearchBinding
@@ -123,14 +118,14 @@ class SearchFragment: Fragment() {
 
         clickDebounce = debounce<Track>(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { item ->
             viewModel.saveToSearchHistory(item)
-            val direction: NavDirections = SearchFragmentDirections.actionSearchFragmentToPlayerActivity(item)
+            val direction: NavDirections = SearchFragmentDirections.actionSearchFragmentToPlayerFragment(item)
             findNavController().navigate(direction)
         }
 
         clickDebounceHistory = debounce<Track>(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { item ->
             viewModel.saveToSearchHistory(item)
             viewModel.showSearchHistory()
-            val direction: NavDirections = SearchFragmentDirections.actionSearchFragmentToPlayerActivity(item)
+            val direction: NavDirections = SearchFragmentDirections.actionSearchFragmentToPlayerFragment(item)
             findNavController().navigate(direction)
         }
 
@@ -164,17 +159,18 @@ class SearchFragment: Fragment() {
             }
         }
 
-
+        viewModel.observeHistory().observe(viewLifecycleOwner) {
+            showSearchHistory(it)
+        }
         viewModel.observeState().observe(viewLifecycleOwner) {
+            hideHistory()
             render(it)
         }
 
         viewModel.observeShowToast().observe(viewLifecycleOwner) {
             showToast(it)
         }
-        viewModel.observeHistory().observe(viewLifecycleOwner) {
-            showSearchHistory(it)
-        }
+
     }
 
     override fun onDestroyView() {
@@ -278,6 +274,7 @@ class SearchFragment: Fragment() {
         const val SEARCH_NAME = "TEXT_WATCHER_NAME"
         const val NAME_DEF = ""
         private const val CLICK_DEBOUNCE_DELAY = 1000L
+
 
         const val TAG = "SearchFragment"
 

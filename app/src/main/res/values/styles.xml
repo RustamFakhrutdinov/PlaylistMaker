@@ -294,6 +294,41 @@
         <item name="android:paddingTop">10dp</item>
     </style>
 
+    <style name="RoundedCorners">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="SwitchBackColor">
+        <item name="android:backgroundTint">@color/white</item>
+    </style>
+
+    <style name="BottomSheetPlaylistsLinearLayout">
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:background">@drawable/bottom_sheet_rounder</item>
+    </style>
+
+    <style name="DragItem">
+        <item name="android:backgroundTint">@color/separate_line_gray</item>
+        <item name="android:background">@drawable/rounder</item>
+    </style>
+
+    <style name="TextColor">
+        <item name="android:textColor">@color/another_black</item>
+    </style>
+
+    <style name="CustomAlertDialogButtonStyle" >
+        <item name="android:textColor">@color/main_theme_color</item>
+        <item name="android:textSize">@color/main_theme_color</item>
+    </style>
+
+    <style name="CustomTextInputStyle" >
+        <item name="colorControlActivated">@color/main_theme_color</item>
+    </style>
+
+
+
+
 
 
 

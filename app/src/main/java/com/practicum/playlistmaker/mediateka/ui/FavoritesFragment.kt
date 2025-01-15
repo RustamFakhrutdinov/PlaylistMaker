@@ -14,7 +14,7 @@ import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentFavoritesBinding
 import com.practicum.playlistmaker.mediateka.ui.state.FavouriteTracksState
 import com.practicum.playlistmaker.mediateka.ui.viewmodel.FavoritesViewModel
-import com.practicum.playlistmaker.player.ui.PlayerActivity
+
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.SearchFragment
 import com.practicum.playlistmaker.search.ui.state.SearchState
@@ -64,7 +64,7 @@ class FavoritesFragment : Fragment() {
         }
 
         clickDebounce = debounce<Track>(FavoritesFragment.CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { item ->
-            val direction: NavDirections = MediatekaFragmentDirections.actionMediatekaFragmentToPlayerActivity(item)
+            val direction: NavDirections = MediatekaFragmentDirections.actionMediatekaFragmentToPlayerFragment(item)
             findNavController().navigate(direction)
 
         }

@@ -2,6 +2,7 @@ package com.practicum.playlistmaker.mediateka.ui.root
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.commit
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -23,6 +24,23 @@ class RootActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         binding.bottomNavigationView.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.newPlaylistFragment -> {
+                    binding.bottomNavigationView.visibility = View.GONE
+                }
+                R.id.chosenPlaylistFragment -> {
+                    binding.bottomNavigationView.visibility = View.GONE
+                }
+                R.id.playerFragment -> {
+                    binding.bottomNavigationView.visibility = View.GONE
+                }
+                else -> {
+                    binding.bottomNavigationView.visibility = View.VISIBLE
+                }
+            }
+        }
 
     }
 }

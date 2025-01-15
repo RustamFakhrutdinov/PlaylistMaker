@@ -4,7 +4,7 @@ import com.practicum.playlistmaker.search.domain.models.Track
 
 interface PlayerRepository {
     fun isPlaying(): Boolean
-    fun preparePlayer()
+    fun preparePlayer(url: String)
 
     fun getTime(): String
 

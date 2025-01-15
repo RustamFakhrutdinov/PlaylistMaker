@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.util
 import android.app.Application
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
+import com.markodevcic.peko.PermissionRequester
 import com.practicum.playlistmaker.di.dataModule
 import com.practicum.playlistmaker.di.interactorModule
 import com.practicum.playlistmaker.di.repositoryModule
@@ -30,6 +31,8 @@ class App: Application() {
             androidContext(this@App)
             modules(dataModule, repositoryModule, interactorModule, viewModelModule)
         }
+
+        PermissionRequester.initialize(applicationContext)
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         instance = this

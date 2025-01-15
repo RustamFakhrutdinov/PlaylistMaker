@@ -1,14 +1,12 @@
-package com.practicum.playlistmaker.mediateka.data
+package com.practicum.playlistmaker.mediateka.data.reposirtory
 
 import com.practicum.playlistmaker.mediateka.data.converters.TrackFavouriteDbConverter
-import com.practicum.playlistmaker.mediateka.data.db.AppDatabase
 import com.practicum.playlistmaker.mediateka.data.db.dao.TrackFavouriteDao
 import com.practicum.playlistmaker.mediateka.data.db.entity.TrackFavouriteEntity
 import com.practicum.playlistmaker.mediateka.domain.db.FavouriteRepository
 import com.practicum.playlistmaker.search.data.dto.TrackDto
 import com.practicum.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.time.Instant

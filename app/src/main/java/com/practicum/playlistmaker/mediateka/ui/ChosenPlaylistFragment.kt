@@ -74,6 +74,7 @@ class ChosenPlaylistFragment : Fragment() {
     //al overlay = binding.overlay
 
     private lateinit var playlist: Playlist
+    var peekHightOfStandartBS = 0
     private val args: ChosenPlaylistFragmentArgs by navArgs()
 
     private lateinit var tracksListView: RecyclerView
@@ -116,6 +117,15 @@ class ChosenPlaylistFragment : Fragment() {
         }
 
         initializeViews()
+        BottomSheetBehavior.from(binding.standardBottomSheet).apply {
+            binding.menuLayout.post {
+                val height = resources.displayMetrics.heightPixels - binding.menuLayout.bottom - 20
+                if (peekHeight > height) {
+                    peekHeight = height
+                    peekHightOfStandartBS = peekHeight
+                }
+            }
+        }
 
         val menuBottomSheetBehavior = BottomSheetBehavior.from(binding.menuBottomSheet).apply {
             state = BottomSheetBehavior.STATE_HIDDEN
@@ -124,7 +134,7 @@ class ChosenPlaylistFragment : Fragment() {
 
         binding.menuButton.setOnClickListener {
             menuBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-
+            binding.standardBottomSheet.visibility = View.GONE
         }
 
         menuBottomSheetBehavior.addBottomSheetCallback(object :
@@ -134,6 +144,7 @@ class ChosenPlaylistFragment : Fragment() {
 
                 when (newState) {
                     BottomSheetBehavior.STATE_HIDDEN -> {
+                        binding.standardBottomSheet.visibility = View.VISIBLE
                         binding.overlay.visibility = View.GONE
                     }
 
@@ -148,14 +159,7 @@ class ChosenPlaylistFragment : Fragment() {
             }
         })
 
-        BottomSheetBehavior.from(binding.standardBottomSheet).apply {
-            binding.menuLayout.post {
-                val height = resources.displayMetrics.heightPixels - binding.menuLayout.bottom - 20
-                if (peekHeight > height) {
-                    peekHeight = height
-                }
-            }
-        }
+
 
         //кнопка назад
         backButton.setOnClickListener {
@@ -236,7 +240,6 @@ class ChosenPlaylistFragment : Fragment() {
 
     private fun showEmpty(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-        //tracksCount.text = "0 треков"
         minutesCount.text = "0 минут"
         tracksList.clear()
         trackAdapter.notifyDataSetChanged()
@@ -257,7 +260,7 @@ class ChosenPlaylistFragment : Fragment() {
         }
 
         val count = playlist.count
-        tracksCount.text = count.toString() + " трек" + getTrackWordEnding(count)
+        tracksCount.text = count.toString() + " " + getString(R.string.track) + getTrackWordEnding(count)
 
         Glide.with(this)
             .load(playlist.path)
@@ -270,7 +273,9 @@ class ChosenPlaylistFragment : Fragment() {
 
     private fun showContent(tracks: List<Track>) {
         val minutes = sumMinutes(tracks)
-        minutesCount.text = dateFormatForMinutes.format(minutes) + " " + getMinuteSuffix(minutes)
+        val s = dateFormatForMinutes.format(minutes)
+
+        minutesCount.text = dateFormatForMinutes.format(minutes).removePrefix("0") + " " + getMinuteSuffix(minutes)
 
         tracksListView = binding.rvTrackBSItem
         tracksListView.adapter = trackAdapter

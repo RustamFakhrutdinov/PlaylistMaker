@@ -189,6 +189,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:elevation="5dp"
         app:behavior_hideable="false"
         app:behavior_peekHeight="266dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
@@ -218,11 +219,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:elevation="10dp"
         android:paddingBottom="100dp"
         app:behavior_hideable="true"
         app:behavior_peekHeight="383dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <View
             style="@style/DragItem"

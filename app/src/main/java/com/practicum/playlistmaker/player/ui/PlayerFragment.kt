@@ -192,7 +192,7 @@ class PlayerFragment : Fragment() {
     private fun showPlaylistAdded(name: String) {
         val bottomSheetContainer = binding.standardBottomSheet
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetContainer)
-        // bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         Toast.makeText(requireContext(), "Добавлено в плейлист $name", Toast.LENGTH_LONG).show()
     }

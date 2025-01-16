@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -21,6 +22,8 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.view.isEmpty
+import androidx.core.view.isNotEmpty
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -40,6 +43,7 @@ import com.practicum.playlistmaker.mediateka.domain.models.Playlist
 import com.practicum.playlistmaker.mediateka.ui.state.FavouriteTracksState
 import com.practicum.playlistmaker.mediateka.ui.viewmodel.PlaylistViewModel
 import com.practicum.playlistmaker.player.ui.PlayerFragmentArgs
+import com.practicum.playlistmaker.player.ui.PlayerFragmentDirections
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.SearchFragment
 import com.practicum.playlistmaker.search.ui.SearchFragmentDirections
@@ -54,18 +58,23 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ChosenPlaylistFragment: Fragment() {
+class ChosenPlaylistFragment : Fragment() {
     private val dateFormatForMinutes by lazy { SimpleDateFormat("mm", Locale.getDefault()) }
 
     private lateinit var cover: ImageView
     private lateinit var playlistName: TextView
     private lateinit var playlistDescription: TextView
     private lateinit var minutesCount: TextView
-    private lateinit var tracksCount:TextView
+    private lateinit var tracksCount: TextView
     private lateinit var confirmationDialog: MaterialAlertDialogBuilder
     private lateinit var startDrawable: Drawable
+    private lateinit var shareButton: ImageView
+    private lateinit var menuButton: ImageView
+
+    //al overlay = binding.overlay
 
     private lateinit var playlist: Playlist
+    var peekHightOfStandartBS = 0
     private val args: ChosenPlaylistFragmentArgs by navArgs()
 
     private lateinit var tracksListView: RecyclerView
@@ -83,7 +92,7 @@ class ChosenPlaylistFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        binding = FragmentChosenPlaylistBinding.inflate(inflater,container,false)
+        binding = FragmentChosenPlaylistBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -91,35 +100,66 @@ class ChosenPlaylistFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val backButton = binding.backButtonPlayer
-
-        playlist = args.playlist
-        viewmodel.loadTrackList(playlist.playlistId)
         initializeViews()
-        addInformation()
+        playlist = args.playlist
 
+        viewmodel.loadTrackList(playlist.playlistId)
         viewmodel.getTracksLiveData().observe(viewLifecycleOwner) {
             render(it)
         }
 
+
+
+        viewmodel.fillOnePlaylistData(playlist.playlistId)
+        viewmodel.getOnePlaylistLiveData().observe(viewLifecycleOwner) {
+            addInformation(it)
+            playlist = it
+        }
+
+        initializeViews()
         BottomSheetBehavior.from(binding.standardBottomSheet).apply {
             binding.menuLayout.post {
-                val height = resources.displayMetrics.heightPixels - binding.menuLayout.bottom -20
+                val height = resources.displayMetrics.heightPixels - binding.menuLayout.bottom - 20
                 if (peekHeight > height) {
                     peekHeight = height
+                    peekHightOfStandartBS = peekHeight
                 }
             }
         }
 
-        //инициализируем диалог
-        confirmationDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.dialog_title))
-            .setMessage(getString(R.string.dialog_message))
-            .setNeutralButton(getString(R.string.dialog_cancel)) { dialog, which ->
+        val menuBottomSheetBehavior = BottomSheetBehavior.from(binding.menuBottomSheet).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN
 
+        }
+
+        binding.menuButton.setOnClickListener {
+            menuBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            binding.standardBottomSheet.visibility = View.GONE
+        }
+
+        menuBottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+
+                when (newState) {
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        binding.standardBottomSheet.visibility = View.VISIBLE
+                        binding.overlay.visibility = View.GONE
+                    }
+
+                    else -> {
+                        binding.overlay.visibility = View.VISIBLE
+                    }
+                }
             }
-            .setPositiveButton(getString(R.string.dialog_complete)) { dialog, which ->
-                findNavController().navigateUp()
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                binding.overlay.alpha = (slideOffset + 1) / 2
             }
+        })
+
+
 
         //кнопка назад
         backButton.setOnClickListener {
@@ -127,14 +167,17 @@ class ChosenPlaylistFragment: Fragment() {
         }
 
         //системная кнопка назад
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                onBack()
-            }
-        })
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    onBack()
+                }
+            })
 
         clickDebounce = debounce<Track>(1000L, viewLifecycleOwner.lifecycleScope, false) { item ->
-            val direction: NavDirections = ChosenPlaylistFragmentDirections.actionChosenPlaylistFragmentToPlayerFragment(item)
+            val direction: NavDirections =
+                ChosenPlaylistFragmentDirections.actionChosenPlaylistFragmentToPlayerFragment(item)
             findNavController().navigate(direction)
 
         }
@@ -143,12 +186,32 @@ class ChosenPlaylistFragment: Fragment() {
             clickDebounce(item)
         }
 
+        trackAdapter.onTrackLongClickListener = TrackViewHolder.OnTrackLongClickListener { track ->
+            deleteTrack(track, playlist.playlistId)
+        }
+
+        shareButton.setOnClickListener {
+            sharePlaylist()
+        }
+
+        binding.shareTextView.setOnClickListener {
+            sharePlaylist()
+        }
+
+        binding.deletePlaylistTextView.setOnClickListener {
+            BottomSheetBehavior.from(binding.menuBottomSheet).apply {
+                state = BottomSheetBehavior.STATE_HIDDEN
+            }
+            deletePlaylist(playlist.playlistId)
+        }
+
+        binding.editPlaylistTextView.setOnClickListener {
+            val direction: NavDirections = ChosenPlaylistFragmentDirections
+                .actionChosenPlaylistFragmentToNewPlaylistFragment(playlist)
+            findNavController().navigate(direction)
+        }
 
 
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
     }
 
 
@@ -159,26 +222,30 @@ class ChosenPlaylistFragment: Fragment() {
         minutesCount = binding.minutesCount
         tracksCount = binding.tracksCount
         startDrawable = binding.cover.drawable
+        shareButton = binding.shareButton
+        menuButton = binding.menuButton
 
     }
+
     private fun onBack() {
         findNavController().navigateUp()
     }
+
     private fun render(state: FavouriteTracksState) {
         when (state) {
             is FavouriteTracksState.Empty -> showEmpty(state.message)
-            is FavouriteTracksState.Content ->showContent(state.tracks)
+            is FavouriteTracksState.Content -> showContent(state.tracks)
         }
     }
 
     private fun showEmpty(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-        tracksCount.text = "0 треков"
         minutesCount.text = "0 минут"
         tracksList.clear()
         trackAdapter.notifyDataSetChanged()
     }
-    private fun addInformation(){
+
+    private fun addInformation(playlist: Playlist) {
         Glide.with(this)
             .load(playlist!!.path)
             .placeholder(R.drawable.placeholder)
@@ -191,12 +258,24 @@ class ChosenPlaylistFragment: Fragment() {
             playlistDescription.visibility = View.VISIBLE
             playlistDescription.text = playlist.description
         }
-    }
-    private fun showContent(tracks: List<Track>) {
-        tracksCount.text = playlist.count.toString() +" трек"+ getTrackWordEnding(playlist.count)
 
+        val count = playlist.count
+        tracksCount.text = count.toString() + " " + getString(R.string.track) + getTrackWordEnding(count)
+
+        Glide.with(this)
+            .load(playlist.path)
+            .placeholder(R.drawable.placeholder)
+            .into(binding.coverBS)
+
+        binding.nameBS.text = playlistName.text
+        binding.countBS.text = tracksCount.text
+    }
+
+    private fun showContent(tracks: List<Track>) {
         val minutes = sumMinutes(tracks)
-        minutesCount.text = dateFormatForMinutes.format(minutes) + " " + getMinuteSuffix(minutes)
+        val s = dateFormatForMinutes.format(minutes)
+
+        minutesCount.text = dateFormatForMinutes.format(minutes).removePrefix("0") + " " + getMinuteSuffix(minutes)
 
         tracksListView = binding.rvTrackBSItem
         tracksListView.adapter = trackAdapter
@@ -208,11 +287,12 @@ class ChosenPlaylistFragment: Fragment() {
 
     private fun sumMinutes(tracks: List<Track>): Long {
         var sum: Long = 0
-        tracks.forEach {track ->
-            sum+=parseTimeToMillis(track.trackTime)
+        tracks.forEach { track ->
+            sum += parseTimeToMillis(track.trackTime)
         }
         return sum
     }
+
     private fun getMinuteSuffix(milliseconds: Long): String {
         val minutes = (milliseconds / 1000) / 60
         val lastTwoDigits = minutes % 100
@@ -225,6 +305,7 @@ class ChosenPlaylistFragment: Fragment() {
             else -> "минут"
         }
     }
+
     private fun getTrackWordEnding(count: Int): String {
         return when {
             count % 100 in 11..19 -> "ов" // Числа от 11 до 19
@@ -239,6 +320,47 @@ class ChosenPlaylistFragment: Fragment() {
         val minutes = parts[0].toInt()
         val seconds = parts[1].toInt()
         return (minutes * 60 + seconds) * 1000L
+    }
+
+    private fun deleteTrack(track: Track, playlistId: Int) {
+        confirmationDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.delete_track))
+            .setMessage(getString(R.string.are_you_sure_delete_track))
+            .setNeutralButton(getString(R.string.dialog_cancel)) { dialog, which ->
+
+            }
+            .setPositiveButton(getString(R.string.dialog_delete)) { dialog, which ->
+                viewmodel.deleteTrackFromPlaylist(track, playlistId)
+            }
+        confirmationDialog.show()
+    }
+
+    private fun deletePlaylist(playlistId: Int) {
+        confirmationDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.delete_playlist))
+            .setMessage(getString(R.string.are_you_sure_delete_playlist) + " «" + playlistName.text.toString() + "»?")
+            .setNeutralButton(getString(R.string.no)) { dialog, which ->
+            }
+            .setPositiveButton(getString(R.string.yes)) { dialog, which ->
+                viewmodel.deletePlaylist(playlistId)
+                findNavController().navigateUp()
+            }
+        confirmationDialog.show()
+    }
+
+    private fun sharePlaylist() {
+        BottomSheetBehavior.from(binding.menuBottomSheet).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN
+        }
+        if (!tracksList.isNullOrEmpty()) {
+            viewmodel.sharePlaylist(playlist, tracksList)
+        } else {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.share_playlist_empty),
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
 }

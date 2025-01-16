@@ -17,6 +17,7 @@ class TrackViewHolder (private val binding: TrackItemBinding): RecyclerView.View
     private val time: TextView = binding.trackTime
     private val trackCover: ImageView = binding.trackCover
     var onTrackClickListener: OnTrackClickListener? = null
+    var onTrackLongClickListener: OnTrackLongClickListener? = null
     fun bind(track: Track) {
         val imageUrl:String = track.artworkUrl100
         performerName.requestLayout()
@@ -32,6 +33,10 @@ class TrackViewHolder (private val binding: TrackItemBinding): RecyclerView.View
         itemView.setOnClickListener {
             onTrackClickListener?.onTrackClick(track)
         }
+        itemView.setOnLongClickListener {
+            onTrackLongClickListener?.onTrackLongClick(track)
+            true
+        }
     }
     fun dpToPx(dp: Float, context: Context): Int {
         return TypedValue.applyDimension(
@@ -41,6 +46,10 @@ class TrackViewHolder (private val binding: TrackItemBinding): RecyclerView.View
     }
     fun interface OnTrackClickListener {
         fun onTrackClick(track: Track)
+    }
+
+    fun interface OnTrackLongClickListener {
+        fun onTrackLongClick(track: Track)
     }
 
 }

@@ -15,5 +15,6 @@ data class TrackInPlaylistsEntity(
     val releaseDate: String,       // дата выхода
     val primaryGenreName: String,  // жанр
     val country: String,           // страна
-    val previewUrl:String          // ссылка на отрывок трека
+    val previewUrl: String,         // ссылка на отрывок трека
+    val addedTimestamp: Long
 )

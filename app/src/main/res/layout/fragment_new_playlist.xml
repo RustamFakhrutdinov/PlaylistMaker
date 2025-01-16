@@ -71,25 +71,6 @@
                 app:shapeAppearanceOverlay="@style/RoundedCorners"
                 app:srcCompat="@drawable/new_playlist_cover" />
 
-            <!--    <EditText-->
-            <!--        android:id="@+id/enterName"-->
-            <!--        android:layout_width="0dp"-->
-            <!--        android:layout_height="56dp"-->
-            <!--        android:layout_marginTop="32dp"-->
-            <!--        android:paddingLeft="16dp"-->
-            <!--        android:layout_gravity="center"-->
-            <!--        android:hint="@string/playlist_name"-->
-            <!--        android:textSize="16sp"-->
-            <!--        android:singleLine="true"-->
-            <!--        android:inputType="text"-->
-            <!--        android:maxLength="30"-->
-            <!--        android:fontFamily="@font/ys_display_regular"-->
-            <!--        android:background="@drawable/grey_rounded_dash_rectangle"-->
-            <!--        app:layout_constraintEnd_toEndOf="@id/rightBorderForTrackName"-->
-            <!--        app:layout_constraintStart_toStartOf="@id/leftBorderForTrackName"-->
-            <!--        app:layout_constraintTop_toBottomOf="@id/cover"-->
-            <!--        />-->
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textNameInputLayout"
                 android:layout_width="0dp"
@@ -105,9 +86,7 @@
                 app:hintTextColor="@color/main_theme_color"
                 app:layout_constraintEnd_toEndOf="@id/rightBorderForTrackName"
                 app:layout_constraintStart_toStartOf="@id/leftBorderForTrackName"
-                app:layout_constraintTop_toBottomOf="@id/cover"
-
-                >
+                app:layout_constraintTop_toBottomOf="@id/cover">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/enterName"
@@ -127,6 +106,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:hint="@string/playlist_disc"
+                android:textCursorDrawable="@drawable/custom_cursor"
+                android:theme="@style/CustomTextInputStyle"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/selector_edittext"
                 app:boxStrokeWidthFocused="1dp"

@@ -20,15 +20,19 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.markodevcic.peko.PermissionRequester
 import com.markodevcic.peko.PermissionResult
 
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentNewPlaylistBinding
+import com.practicum.playlistmaker.mediateka.domain.models.Playlist
 import com.practicum.playlistmaker.mediateka.ui.viewmodel.PlaylistViewModel
 import com.practicum.playlistmaker.search.ui.SearchFragment
 import kotlinx.coroutines.launch
@@ -41,12 +45,6 @@ import java.util.Locale
 
 class NewPlaylistFragment : Fragment() {
 
-    companion object {
-        const val SEARCH_NAME = "TEXT_WATCHER_NAME"
-        const val NAME_DEF = ""
-
-    }
-
     var imageUri: Uri? = null
     private val currentDate by lazy {
         SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
@@ -56,11 +54,14 @@ class NewPlaylistFragment : Fragment() {
     private lateinit var nameTextWatcher: TextWatcher
 
     private lateinit var cover: ImageView
-    private lateinit var playlistName: EditText
-    private lateinit var playlistDescription: EditText
+    private lateinit var playlistName: TextInputEditText
+    private lateinit var playlistDescription: TextInputEditText
     private lateinit var createPlaylist: AppCompatButton
     private lateinit var confirmationDialog: MaterialAlertDialogBuilder
     private lateinit var startDrawable: Drawable
+
+    private lateinit var playlist: Playlist
+    private val args: NewPlaylistFragmentArgs by navArgs()
 
 
     private lateinit var binding: FragmentNewPlaylistBinding
@@ -83,6 +84,12 @@ class NewPlaylistFragment : Fragment() {
 
         val backButton = binding.backButtonPlayer
 
+
+
+        playlist = args.playlist
+
+
+
         initializeViews()
 
         //инициализируем диалог
@@ -95,8 +102,6 @@ class NewPlaylistFragment : Fragment() {
             .setPositiveButton(getString(R.string.dialog_complete)) { dialog, which ->
                 findNavController().navigateUp()
             }
-
-        playlistName.setText(editTextValue)
 
         nameTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -185,13 +190,16 @@ class NewPlaylistFragment : Fragment() {
         }
 
         createPlaylist.setOnClickListener {
-            createPlaylist()
-
-            Toast.makeText(
-                requireContext(),
-                "Плейлист " + binding.enterName.text.toString() + " создан",
-                Toast.LENGTH_LONG
-            ).show()
+            if (playlist.playlistId == -1) {
+                createPlaylist()
+                Toast.makeText(
+                    requireContext(),
+                    "Плейлист " + binding.enterName.text.toString() + " создан",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                editPlaylist()
+            }
         }
 
 
@@ -208,6 +216,16 @@ class NewPlaylistFragment : Fragment() {
         playlistName = binding.enterName
         playlistDescription = binding.enterDescription
         createPlaylist = binding.createButton
+
+        if (playlist.playlistId != -1) {
+            binding.newPlaylistName.text = getString(R.string.edit_playlist)
+            binding.createButton.text = getString(R.string.save)
+            cover.setImageURI(playlist.path?.toUri())
+            //imageUri = playlist.path?.toUri()
+            playlistName.setText(playlist.name)
+            playlistDescription.setText(playlist.description)
+            createPlaylist.isEnabled = createButtonEnabled(playlistName.text.toString())
+        }
         startDrawable = binding.cover.drawable
 
     }
@@ -217,19 +235,32 @@ class NewPlaylistFragment : Fragment() {
     }
 
     private fun onBack() {
-
-        if (!binding.enterName.text.isNullOrBlank() ||
-            !binding.enterDescription.text.isNullOrBlank() ||
-            binding.cover.drawable != startDrawable
-        )
-            confirmationDialog.show()
-        else {
+        if (playlist.playlistId != -1) {
             findNavController().navigateUp()
+        } else {
+            if (!binding.enterName.text.isNullOrBlank() ||
+                !binding.enterDescription.text.isNullOrBlank() ||
+                binding.cover.drawable != startDrawable
+            )
+                confirmationDialog.show()
+            else {
+                findNavController().navigateUp()
+            }
         }
     }
 
     private fun createPlaylist() {
         viewmodel.addPlaylist(
+            binding.enterName.text.toString(),
+            binding.enterDescription.text.toString(),
+            imageUri
+        )
+        findNavController().navigateUp()
+    }
+
+    private fun editPlaylist() {
+        viewmodel.editPlaylist(
+            playlist.playlistId,
             binding.enterName.text.toString(),
             binding.enterDescription.text.toString(),
             imageUri

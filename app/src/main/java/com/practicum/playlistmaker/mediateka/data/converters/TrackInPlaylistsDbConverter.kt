@@ -8,24 +8,28 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class TrackInPlaylistsDbConverter {
-    fun map(track: TrackDto): TrackInPlaylistsEntity {
-        return TrackInPlaylistsEntity(track.trackId!!,
-            track.trackName?: "",
-            track.artistName?: "",
-            SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis?:0L),
-            track.artworkUrl100?: "",
-            track.collectionName?: "",
-            track.releaseDate?: "",
-            track.primaryGenreName?: "",
-            track.country?: "",
-            track.previewUrl?: "",
+    fun map(track: TrackDto, addedTimestamp: Long?): TrackInPlaylistsEntity {
+        return TrackInPlaylistsEntity(
+            track.trackId!!,
+            track.trackName ?: "",
+            track.artistName ?: "",
+            SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis ?: 0L),
+            track.artworkUrl100 ?: "",
+            track.collectionName ?: "",
+            track.releaseDate ?: "",
+            track.primaryGenreName ?: "",
+            track.country ?: "",
+            track.previewUrl ?: "",
+            addedTimestamp ?: 0L
         )
     }
 
     fun map(track: TrackInPlaylistsEntity): Track {
 
-        return Track(track.trackId,track.trackName,track.artistName, track.trackTime,
+        return Track(
+            track.trackId, track.trackName, track.artistName, track.trackTime,
             track.artworkUrl100, track.collectionName, track.releaseDate, track.primaryGenreName,
-            track.country, track.previewUrl)
+            track.country, track.previewUrl
+        )
     }
 }
